@@ -7,6 +7,7 @@ const parseXml = xml2js.parseString
 */
 
 const QUERY_START = 'query='
+const REQUEST_START = 'https://m1.profium.com/servlet/QueryServlet?'
 const DISPLAY_URL_START = 'https://m1.profium.com/displayContent.do?uri='
 const IMAGE = '<http://www.profium.com/archive/Image>'
 const DEPICTED_OBJ = '<http://www.profium.com/archive/depictedObject>'
@@ -24,11 +25,11 @@ export default class API {
 
   static query(config) {
 
-    const request = 'https://m1.profium.com/servlet/QueryServlet?'
+    const request = REQUEST_START
     const options = {
       method: 'POST',
       headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
+          "Content-Type": "application/x-www-form-urlencoded"
       },
       body: config.query
     }
@@ -41,15 +42,13 @@ export default class API {
       const xml = responseText
       let resultsArray = []
       parseXml(xml, function (err, result) {
-        const json = JSON.stringify(result)
-        const obj = JSON.parse(json) // this step feels a little schizophrenic, but ehh, time is of the essence
 
-        const results = obj.sparql.results[0].result
+        const results = result.sparql.results[0].result
         results.map(item => 
           resultsArray.push(item.binding[0].literal[0]._)
         )
       })
-      // console.log(resultsArray);
+      console.log(resultsArray);
       return resultsArray
     })
     .catch(error => console.error(error))
