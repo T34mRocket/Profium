@@ -30,18 +30,21 @@ export default class HomeScreen extends React.Component {
   // not sure if this is the best place to do this... change if needed
   componentDidMount = () => {
 
-    const config = {
-      query: API.GET_ALL_IMAGE_VIEWS // fetch the top level category names
-      // this can have other properties as needed
-    }
-    API.query(config).then( results =>
-      
-      this.setState(prevState => { return {
-        options: results
-      }})
-      // console.log(results)
-    )
-  }
+    // I'm not sure why tf it needs such an elaborate check, but it doesn't work without it
+    if (typeof this.state.options === 'undefined' || this.state.options.length <= 0) {
+      const config = {
+        query: API.GET_ALL_TOP_LVL_PROPS // fetch the top level category names
+        // this can have other properties as needed
+      }
+      API.query(config).then( resultsSet =>
+        
+        this.setState(prevState => { return {
+          options: Array.from(resultsSet)
+        }})
+        // console.log(results)
+      ) // then
+    } // if
+  } // componentDidMount
 
   render() {
     const options = this.state.options
