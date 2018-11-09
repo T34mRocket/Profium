@@ -1,4 +1,4 @@
-import React from 'react';
+import React from 'react'
 import {
   Picker,
   Image,
@@ -11,16 +11,17 @@ import {
   Alert,
   FlatList,
   Button
-} from 'react-native';
-import { WebBrowser } from 'expo';
+} from 'react-native'
+import { WebBrowser } from 'expo'
 
-import { MonoText } from '../components/StyledText';
+import { MonoText } from '../components/StyledText'
 import { CustomPicker } from 'react-native-custom-picker'
-import { Card, CardTitle, CardContent, CardAction, CardButton, CardImage } from 'react-native-cards';
-import ScrollableFlatList from '../components/ScrollableFlatList';
-import ImageCardListItem from '../components/ImageCardListItem';
+import { Card, CardTitle, CardContent, CardAction, CardButton, CardImage } from 'react-native-cards'
+import ScrollableFlatList from '../components/ScrollableFlatList'
+import ImageCardListItem from '../components/ImageCardListItem'
 import API from '../api/API'
 
+/*
 const data = [
   {
     title: "something"
@@ -40,7 +41,8 @@ const data = [
   {
     title: "something six"
   }
-];
+]
+*/
 
 export default class HomeScreen extends React.Component {
   static navigationOptions = {
@@ -48,11 +50,11 @@ export default class HomeScreen extends React.Component {
   };
 
   constructor(props) {
-    super(props);
+    super(props)
     this.state = {
-      data: data,
+      // data: data,
       options:[]
-    };
+    }
   }
 
   // not sure if this is the best place to do this... change if needed
@@ -69,19 +71,20 @@ export default class HomeScreen extends React.Component {
         this.setState(prevState => { return {
           options: Array.from(resultsSet)
         }})
-        console.log(this.state.options)
       }) // then
     } // if
   } // componentDidMount
 
   render() {
-    //const options = ['One', 'Two', 'Three', 'Four', 'Five']
+
+    console.log(this.state.options)
+
     return (
       <View style={{ flex: 1, flexDirection: 'column', justifyContent: 'flex-start', marginTop: 25 }}>
 
         <ScrollableFlatList
-              props={data}
-        />
+              props={this.state.options}
+        /> 
         <View
           style={{
             margin:0,
