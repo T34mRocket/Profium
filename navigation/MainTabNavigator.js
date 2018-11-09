@@ -30,7 +30,7 @@ const HistoryStack = createStackNavigator({
 });
 
 HistoryStack.navigationOptions = {
-  tabBarLabel: 'History',
+  tabBarLabel: 'Info',
   tabBarIcon: ({ focused }) => (
     <TabBarIcon
       focused={focused}
