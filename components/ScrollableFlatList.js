@@ -5,7 +5,7 @@ const ScrollableFlatList = ({ props }) => {
 
   return (
     <FlatList 
-      style = {{maxHeight:50}}
+      style = {{ maxHeight: 60}}
       horizontal            
       showsHorizontalScrollIndicator = {false}
       data = {props}
@@ -14,8 +14,8 @@ const ScrollableFlatList = ({ props }) => {
         return (
           <TouchableOpacity
             style={styles.button}
-            onPress={() => console.log("pressed "/*+rowData.title*/)}
-            delayPressIn={50}
+            onPress={() => console.log("pressed "+rowData)}
+            delayPressIn={ 50 }
           >
             <Text>{rowData}</Text>
           </TouchableOpacity>
@@ -37,10 +37,12 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     backgroundColor: '#fff',
     elevation: 4, // Android
-    maxHeight: 36,
+    height: 36,
     justifyContent: 'center',
     alignItems: 'center',
-    margin: 5,
+    marginLeft: 5,
+    marginRight:5,
+    marginBottom:8,
     padding: 5
   }
 })

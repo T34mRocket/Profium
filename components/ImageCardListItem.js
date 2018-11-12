@@ -25,6 +25,7 @@ export default ImageCardListItem
 
 const styles = StyleSheet.create({
   image: {
+    backgroundColor: 'white',
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',

@@ -10,7 +10,8 @@ import {
   View,
   Alert,
   FlatList,
-  Button
+  Button,
+  StatusBar
 } from 'react-native'
 import { WebBrowser } from 'expo'
 
@@ -21,33 +22,39 @@ import ScrollableFlatList from '../components/ScrollableFlatList'
 import ImageCardListItem from '../components/ImageCardListItem'
 import API from '../api/API'
 
-/*
+
 const data = [
   {
-    title: "something"
+    name: "something",
+    imageUrl:"https://upload.wikimedia.org/wikipedia/commons/f/f9/Phoenicopterus_ruber_in_S%C3%A3o_Paulo_Zoo.jpg"
   },
   {
-    title: "something two"
+    name: "something two",
+    imageUrl:"https://www.gstatic.com/webp/gallery/1.jpg"
   },
   {
-    title: "something three"
+    name: "something three",
+    imageUrl:"https://www.gstatic.com/webp/gallery3/2.png"
   },
   {
-    title: "something four"
+    name: "something four",
+    imageUrl:"https://www.gstatic.com/webp/gallery3/1.png"
   },
   {
-    title: "something five"
+    name: "something five",
+    imageUrl:"https://www.gstatic.com/webp/gallery3/1.png"
   },
   {
-    title: "something six"
-  }
+    name: "something six",
+    imageUrl:"https://www.gstatic.com/webp/gallery3/1.png"
+  },
 ]
-*/
+
 
 export default class HomeScreen extends React.Component {
   static navigationOptions = {
     header: null,
-  };
+  }
 
   constructor(props) {
     super(props)
@@ -80,16 +87,16 @@ export default class HomeScreen extends React.Component {
     console.log(this.state.options)
 
     return (
-      <View style={{ flex: 1, flexDirection: 'column', justifyContent: 'flex-start', marginTop: 25 }}>
+      <View style={{ flex: 1, flexDirection: 'column', justifyContent: 'flex-start', marginTop: StatusBar.currentHeight }}>
 
         <ScrollableFlatList
               props={this.state.options}
         /> 
         <View
           style={{
-            margin:0,
             borderBottomColor: 'grey',
             borderBottomWidth: 1,
+            margin: 5
           }}
         />
         <ScrollableFlatList
@@ -101,26 +108,21 @@ export default class HomeScreen extends React.Component {
             value 
           }}
         />*/}
-        <View style={styles.column}>
-        
-          <View style={styles.row}>
-              <View style={styles.box1}>
-                <ImageCardListItem name={'Image'} imageUrl={'https://upload.wikimedia.org/wikipedia/commons/f/f9/Phoenicopterus_ruber_in_S%C3%A3o_Paulo_Zoo.jpg'}/>
-              </View>
-              <View style={styles.box1} >
-                <ImageCardListItem name={'Image'} imageUrl={'https://www.gstatic.com/webp/gallery/1.jpg'}/>
-              </View>
-          </View>
-          <View style={styles.row}>
-              <View style={styles.box1}>
-                <ImageCardListItem name={'Image'} imageUrl={'https://www.gstatic.com/webp/gallery3/2.png'}/>
-              </View>
-              <View style={styles.box1} >
-                <ImageCardListItem name={'Image'} imageUrl={'https://www.gstatic.com/webp/gallery3/1.png'}/>
-              </View>
-          </View>
-      
-        </View>
+        <FlatList 
+          vertical            
+          data = {data}
+          numColumns={ 2 }
+          renderItem = {({ item: rowData }) => {
+
+            return (
+                <View style={styles.box2} >
+                  <ImageCardListItem name={rowData.name} imageUrl={rowData.imageUrl}  onPress={() => console.log("pressed "+rowData.name)}/>
+                </View>
+            )
+          }}
+          keyExtractor={(item, index) => index.toString()}
+        />
+
         {/*
         Save this for later use if we use it when viewing the selected image/item data
         <Card >
@@ -173,7 +175,7 @@ const styles = StyleSheet.create({
     flex: 1
   },
   box2: {
-    flex: 1
+    flex: 2
   },
   button: {
     shadowColor: 'rgba(0,0,0, .4)', // IOS
@@ -189,4 +191,4 @@ const styles = StyleSheet.create({
     margin: 5,
     padding: 5
   }
-});
+})
