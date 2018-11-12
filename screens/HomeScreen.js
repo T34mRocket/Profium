@@ -7,6 +7,7 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
+  TouchableWithoutFeedback,
   View,
   Alert,
   FlatList,
@@ -83,11 +84,11 @@ export default class HomeScreen extends React.Component {
   } // componentDidMount
 
   render() {
-
+    const { navigate } = this.props.navigation;
     console.log(this.state.options)
 
     return (
-      <View style={{ flex: 1, flexDirection: 'column', justifyContent: 'flex-start', marginTop: StatusBar.currentHeight }}>
+      <View style={{ flex: 1, flexDirection: 'column', justifyContent: 'flex-start', marginTop: StatusBar.currentHeight+5 }}>
 
         <ScrollableFlatList
               props={this.state.options}
@@ -109,53 +110,22 @@ export default class HomeScreen extends React.Component {
           }}
         />*/}
         <FlatList 
+          style={{marginTop:5}}
           vertical            
           data = {data}
           numColumns={ 2 }
           renderItem = {({ item: rowData }) => {
 
             return (
-                <View style={styles.box2} >
-                  <ImageCardListItem name={rowData.name} imageUrl={rowData.imageUrl}  onPress={() => console.log("pressed "+rowData.name)}/>
-                </View>
+                <TouchableWithoutFeedback onPress={() => navigate('Details', { name: rowData.name, imageurl: rowData.imageUrl })}>
+                  <View style={styles.box2} >
+                    <ImageCardListItem name={rowData.name} imageUrl={rowData.imageUrl} />
+                  </View>
+                </TouchableWithoutFeedback>
             )
           }}
           keyExtractor={(item, index) => index.toString()}
         />
-
-        {/*
-        Save this for later use if we use it when viewing the selected image/item data
-        <Card >
-          <CardTitle
-                subtitle="Image"
-                style={{ maxHeight: 50 }}
-          />
-          <CardImage 
-            source={{uri: `https://upload.wikimedia.org/wikipedia/commons/f/f9/Phoenicopterus_ruber_in_S%C3%A3o_Paulo_Zoo.jpg`}}
-          />
-          <View style={styles.row}>
-            <View style={styles.box1}>
-              <CardTitle
-                subtitle="Data"
-              />
-              <CardContent text={`Name`} />
-              <CardContent text={`Description`} />
-              <CardContent text={`Taken`} />
-            </View>
-            <View style={styles.box2} >
-              <CardTitle
-                  subtitle={`More data`}
-              />
-              <CardContent text={`something`} />
-              <CardContent text={`something`} />
-              <CardContent text={`something`} />
-              <CardAction 
-                separator={true}
-                inColumn={true}>
-              </CardAction>
-            </View>
-          </View>
-        </Card>*/}
       </View>
     )
   }
