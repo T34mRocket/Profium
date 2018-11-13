@@ -1,7 +1,7 @@
 import React from 'react'
 import { Text, TouchableOpacity, FlatList, StyleSheet } from 'react-native'
 
-const ScrollableFlatList = ({ props }) => {
+const ScrollableFlatList = ({ props, onCategoryItemPress }) => {
 
   return (
     <FlatList 
@@ -14,7 +14,8 @@ const ScrollableFlatList = ({ props }) => {
         return (
           <TouchableOpacity
             style={styles.button}
-            onPress={() => console.log("pressed "+rowData)}
+            /*onPress={this.props.onMainCategoryPress(rowData)}*/
+            onPress={() => {(onCategoryItemPress) ? onCategoryItemPress(rowData) : console.log("this is sub category "+rowData)}}
             delayPressIn={ 50 }
           >
             <Text>{rowData}</Text>

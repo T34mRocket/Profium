@@ -24,6 +24,8 @@ import ImageCardListItem from '../components/ImageCardListItem'
 import API from '../api/API'
 
 
+// temporary fake data for search results list
+// TODO: delete when we get data from SPARQL DB
 const data = [
   {
     name: "something",
@@ -51,6 +53,21 @@ const data = [
   },
 ]
 
+// TODO: delete when we get sub categories from SPARQL DB
+const subCategoryTemporaryData = [
+    "subcategory 1",
+    "subcategory 2",
+    "subcategory 3",
+    "subcategory 4",
+]
+
+// TODO: delete when we get sub categories from SPARQL DB
+const subCategoryTemporaryData2 = [
+    "hi",
+    "hey",
+    "hello",
+    "greetings",
+]
 
 export default class HomeScreen extends React.Component {
   static navigationOptions = {
@@ -61,7 +78,10 @@ export default class HomeScreen extends React.Component {
     super(props)
     this.state = {
       // data: data,
-      options:[]
+      options:[],
+      subCategoryOptions: subCategoryTemporaryData,
+      showSubCategory: false,
+      clickedCategoryItem: ''
     }
   }
 
@@ -83,6 +103,31 @@ export default class HomeScreen extends React.Component {
     } // if
   } // componentDidMount
 
+  _onFlatListItemPress = (item) => {
+    console.log("selected "+item)
+    this.setState({clickedCategoryItem: item})
+    this.setState({showSubCategory: true})
+
+    // just for testing that when pressing category from Main FlatList, the sub FlatList will "live" reload 
+    // TODO: delete when this is no longer needed
+    switch(item) {
+      case "tekninen kuva":
+          this.setState({subCategoryOptions: subCategoryTemporaryData })
+          break
+      case "hallinto":
+          this.setState({subCategoryOptions: subCategoryTemporaryData2 })
+          break
+      case "markkinointi":
+        this.setState({subCategoryOptions: subCategoryTemporaryData })
+        break
+      case "splash":
+          this.setState({subCategoryOptions: subCategoryTemporaryData2 })
+          break
+      default:
+          this.setState({subCategoryOptions: subCategoryTemporaryData })
+    }
+  }
+
   render() {
     const { navigate } = this.props.navigation;
     console.log(this.state.options)
@@ -92,6 +137,7 @@ export default class HomeScreen extends React.Component {
 
         <ScrollableFlatList
               props={this.state.options}
+              onCategoryItemPress={this._onFlatListItemPress}
         /> 
         <View
           style={{
@@ -100,9 +146,10 @@ export default class HomeScreen extends React.Component {
             margin: 5
           }}
         />
-        <ScrollableFlatList
-              props={this.state.options}
-        />
+        {/*Show the new sub category FlatList when clicking item from Main category FlatList*/}
+        {(this.state.showSubCategory) && <ScrollableFlatList
+              props={this.state.subCategoryOptions}
+        />}
         {/*<CustomPicker
           options={options}
           onValueChange={value => {
