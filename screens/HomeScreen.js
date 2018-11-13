@@ -79,7 +79,7 @@ export default class HomeScreen extends React.Component {
     this.state = {
       // data: data,
       options:[],
-      subCategoryOptions: subCategoryTemporaryData,
+      subCategoryOptions: '',
       showSubCategory: false,
       clickedCategoryItem: ''
     }
@@ -106,7 +106,6 @@ export default class HomeScreen extends React.Component {
   _onFlatListItemPress = (item) => {
     console.log("selected "+item)
     this.setState({clickedCategoryItem: item})
-    this.setState({showSubCategory: true})
 
     // just for testing that when pressing category from Main FlatList, the sub FlatList will "live" reload 
     // TODO: delete when this is no longer needed
@@ -126,6 +125,8 @@ export default class HomeScreen extends React.Component {
       default:
           this.setState({subCategoryOptions: subCategoryTemporaryData })
     }
+    
+    this.setState({showSubCategory: true})
   }
 
   render() {
