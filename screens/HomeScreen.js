@@ -7,19 +7,22 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
+  TouchableWithoutFeedback,
   View,
   Alert,
+  FlatList,
+  Button,
+  StatusBar
 } from 'react-native'
 import { WebBrowser } from 'expo'
 
 import { MonoText } from '../components/StyledText'
 import { CustomPicker } from 'react-native-custom-picker'
+import { Card, CardTitle, CardContent, CardAction, CardButton, CardImage } from 'react-native-cards'
+import ScrollableFlatList from '../components/ScrollableFlatList'
+import ImageCardListItem from '../components/ImageCardListItem'
 import API from '../api/API'
 
-<<<<<<< Updated upstream
-
-=======
->>>>>>> Stashed changes
 export default class HomeScreen extends React.Component {
   static navigationOptions = {
     header: null,
@@ -27,34 +30,16 @@ export default class HomeScreen extends React.Component {
 
   constructor(props) {
     super(props)
-<<<<<<< Updated upstream
-    this.state = { options: [] }
-=======
     this.state = {
       topLevelProps: [],
       chosenImages: [] // urls
     }
     this.onClickProp = this.onClickProp.bind(this)
->>>>>>> Stashed changes
   }
 
   componentDidMount = () => {
 
     // I'm not sure why tf it needs such an elaborate check, but it doesn't work without it
-<<<<<<< Updated upstream
-    if (typeof this.state.options === 'undefined' || this.state.options.length <= 0) {
-      const config = {
-        query: API.GET_ALL_TOP_LVL_PROPS // fetch the top level category names
-        // this can have other properties as needed
-      }
-      API.query(config).then( resultsSet =>
-        
-        this.setState(prevState => { return {
-          options: Array.from(resultsSet)
-        }})
-        // console.log(results)
-      ) // then
-=======
     if (typeof this.state.topLevelProps === 'undefined' || this.state.topLevelProps.length <= 0) {
 
       API.getTopLevelImageProps().then( resultsSet => {
@@ -63,7 +48,6 @@ export default class HomeScreen extends React.Component {
           topLevelProps: Array.from(resultsSet)
         })
       }) // then
->>>>>>> Stashed changes
     } // if
   } // componentDidMount
 
@@ -83,12 +67,6 @@ export default class HomeScreen extends React.Component {
   }
 
   render() {
-<<<<<<< Updated upstream
-    const options = this.state.options
-    return (
-      <View style={{ flex: 1, flexDirection: 'column', justifyContent: 'space-around' }}>
-        <CustomPicker
-=======
 
     // console.log(this.state.topLevelProps)
     // 'https://upload.wikimedia.org/wikipedia/commons/f/f9/Phoenicopterus_ruber_in_S%C3%A3o_Paulo_Zoo.jpg'
@@ -108,14 +86,10 @@ export default class HomeScreen extends React.Component {
           }}
         />
         {/*<CustomPicker
->>>>>>> Stashed changes
           options={options}
           onValueChange={value => {
             value 
           }}
-<<<<<<< Updated upstream
-        />
-=======
         />*/}
         <View style = {styles.column}>
         
@@ -170,9 +144,39 @@ export default class HomeScreen extends React.Component {
             </View>
           </View>
         </Card>*/}
->>>>>>> Stashed changes
       </View>
     )
   }
 
-}
+} // class
+
+const styles = StyleSheet.create({
+  column: {
+    flex: 1,
+    flexDirection: "column"
+  },
+  row: {
+    flex: 1,
+    flexDirection: "row"
+  },
+  box1: {
+    flex: 1
+  },
+  box2: {
+    flex: 2
+  },
+  button: {
+    shadowColor: 'rgba(0,0,0, .4)', // IOS
+    shadowOffset: { height: 1, width: 1 }, // IOS
+    shadowOpacity: 1, // IOS
+    shadowRadius: 1, //IOS,
+    borderRadius: 5,
+    backgroundColor: '#fff',
+    elevation: 2, // Android
+    maxHeight: 54,
+    justifyContent: 'center',
+    alignItems: 'center',
+    margin: 5,
+    padding: 5
+  }
+})
