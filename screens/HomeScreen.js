@@ -12,7 +12,8 @@ import {
   Alert,
   FlatList,
   Button,
-  StatusBar
+  StatusBar,
+  SafeAreaView
 } from 'react-native'
 import { WebBrowser } from 'expo'
 
@@ -134,7 +135,7 @@ export default class HomeScreen extends React.Component {
     console.log(this.state.options)
 
     return (
-      <View style={{ flex: 1, flexDirection: 'column', justifyContent: 'flex-start', marginTop: StatusBar.currentHeight+5 }}>
+      <SafeAreaView style={{ flex: 1, flexDirection: 'column', justifyContent: 'flex-start', marginTop: StatusBar.currentHeight+5 }}>
 
         <ScrollableFlatList
               props={this.state.options}
@@ -174,7 +175,7 @@ export default class HomeScreen extends React.Component {
           }}
           keyExtractor={(item, index) => index.toString()}
         />
-      </View>
+      </SafeAreaView>
     )
   }
 
