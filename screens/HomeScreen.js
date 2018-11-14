@@ -12,7 +12,8 @@ import {
   Alert,
   FlatList,
   Button,
-  StatusBar
+  StatusBar,
+  SafeAreaView
 } from 'react-native'
 import { WebBrowser } from 'expo'
 
@@ -23,6 +24,51 @@ import ScrollableFlatList from '../components/ScrollableFlatList'
 import ImageCardListItem from '../components/ImageCardListItem'
 import API from '../api/API'
 
+// temporary fake data for search results list
+// TODO: delete when we get data from SPARQL DB
+const data = [
+  {
+    name: "something",
+    imageUrl:"https://upload.wikimedia.org/wikipedia/commons/f/f9/Phoenicopterus_ruber_in_S%C3%A3o_Paulo_Zoo.jpg"
+  },
+  {
+    name: "something two",
+    imageUrl:"https://www.gstatic.com/webp/gallery/1.jpg"
+  },
+  {
+    name: "something three",
+    imageUrl:"https://www.gstatic.com/webp/gallery3/2.png"
+  },
+  {
+    name: "something four",
+    imageUrl:"https://www.gstatic.com/webp/gallery3/1.png"
+  },
+  {
+    name: "something five",
+    imageUrl:"https://www.gstatic.com/webp/gallery3/1.png"
+  },
+  {
+    name: "something six",
+    imageUrl:"https://www.gstatic.com/webp/gallery3/1.png"
+  },
+]
+
+// TODO: delete when we get sub categories from SPARQL DB
+const subCategoryTemporaryData = [
+    "subcategory 1",
+    "subcategory 2",
+    "subcategory 3",
+    "subcategory 4",
+]
+
+// TODO: delete when we get sub categories from SPARQL DB
+const subCategoryTemporaryData2 = [
+    "hi",
+    "hey",
+    "hello",
+    "greetings",
+]
+
 export default class HomeScreen extends React.Component {
   static navigationOptions = {
     header: null,
@@ -32,9 +78,12 @@ export default class HomeScreen extends React.Component {
     super(props)
     this.state = {
       topLevelProps: [],
-      chosenImages: [] // urls
+      chosenImages: [], // urls
+      // data: data,
+      subCategoryOptions: '',
+      showSubCategory: false,
+      clickedCategoryItem: ''
     }
-    this.onClickProp = this.onClickProp.bind(this)
   }
 
   componentDidMount = () => {
@@ -47,9 +96,9 @@ export default class HomeScreen extends React.Component {
         this.setState({
           topLevelProps: Array.from(resultsSet)
         })
-      }) // then
-    } // if
-  } // componentDidMount
+      })
+    }
+  }
 
   // passed as a callback to ScrollableFlatList
   onClickProp = (chosenProp) => {
@@ -66,89 +115,81 @@ export default class HomeScreen extends React.Component {
      }) // then
   }
 
+  _onFlatListItemPress = (item) => {
+    // console.log("selected "+item)
+    this.setState({clickedCategoryItem: item})
+
+    // just for testing that when pressing category from Main FlatList, the sub FlatList will "live" reload 
+    // TODO: delete when this is no longer needed
+    switch(item) {
+      case "tekninen kuva":
+          this.setState({subCategoryOptions: subCategoryTemporaryData })
+          break
+      case "hallinto":
+          this.setState({subCategoryOptions: subCategoryTemporaryData2 })
+          break
+      case "markkinointi":
+        this.setState({subCategoryOptions: subCategoryTemporaryData })
+        break
+      case "splash":
+          this.setState({subCategoryOptions: subCategoryTemporaryData2 })
+          break
+      default:
+          this.setState({subCategoryOptions: subCategoryTemporaryData })
+    }
+    
+    this.setState({showSubCategory: true})
+  }
+
   render() {
+
+    const { navigate } = this.props.navigation
 
     // console.log(this.state.topLevelProps)
     // 'https://upload.wikimedia.org/wikipedia/commons/f/f9/Phoenicopterus_ruber_in_S%C3%A3o_Paulo_Zoo.jpg'
 
     return (
-      <View style={{ flex: 1, flexDirection: 'column', justifyContent: 'flex-start', marginTop: 25 }}>
+      <SafeAreaView style={{ flex: 1, flexDirection: 'column', justifyContent: 'flex-start', marginTop: StatusBar.currentHeight+5 }}>
 
         <ScrollableFlatList
-              topLevelProps = {this.state.topLevelProps}
-              onClickProp = {this.onClickProp} // pass the callback... I hate React -.-
+              onCategoryItemPress={this._onFlatListItemPress}
+              data = {this.state.topLevelProps}
+              // onClickProp = {this.onClickProp} // pass the callback... I hate React -.-
         />
         <View
-          style = {{
-            margin: 0,
+          style={{
             borderBottomColor: 'grey',
             borderBottomWidth: 1,
+            margin: 5
           }}
         />
-        {/*<CustomPicker
-          options={options}
-          onValueChange={value => {
-            value 
+        {/*Show the new sub category FlatList when clicking item from Main category FlatList*/}
+        {(this.state.showSubCategory) && <ScrollableFlatList
+              onCategoryItemPress={this._onFlatListItemPress}
+              data = {this.state.subCategoryOptions}
+
+        />}
+        <FlatList 
+          style = {{marginTop:5}}
+          vertical            
+          data = {data}
+          numColumns = { 2 }
+          renderItem = {({ item: rowData }) => {
+
+            return (
+                <TouchableWithoutFeedback onPress={() => navigate('Details', { name: rowData.name, imageurl: rowData.imageUrl })}>
+                  <View style={styles.box2} >
+                    <ImageCardListItem name={rowData.name} imageUrl={rowData.imageUrl} />
+                    </View>
+                </TouchableWithoutFeedback>
+            )
           }}
-        />*/}
-        <View style = {styles.column}>
-        
-          <View style={styles.row}>
-              <View style = {styles.box1}>
-                <ImageCardListItem name = {'Image'} imageUrl = {API.displayUrl(this.state.chosenImages[0])}/>
-              </View>
-              <View style = {styles.box1} >
-                <ImageCardListItem name = {'Image'} imageUrl = {'https://m1.profium.com/displayContent.do?uri=http://www.profium.com/contract-archive//images/primary/20181023/15403037952990.JPG&type=largeThumb'}/>
-              </View>
-          </View>
-          <View style = {styles.row}>
-              <View style = {styles.box1}>
-                <ImageCardListItem name = {'Image'} imageUrl = {'https://www.gstatic.com/webp/gallery3/2.png'}/>
-              </View>
-              <View style = {styles.box1} >
-                <ImageCardListItem name = {'Image'} imageUrl = {'https://www.gstatic.com/webp/gallery3/1.png'}/>
-              </View>
-          </View>
-      
-        </View>
-        {/*
-        Save this for later use if we use it when viewing the selected image/item data
-        <Card >
-          <CardTitle
-                subtitle="Image"
-                style={{ maxHeight: 50 }}
-          />
-          <CardImage 
-            source={{uri: `https://upload.wikimedia.org/wikipedia/commons/f/f9/Phoenicopterus_ruber_in_S%C3%A3o_Paulo_Zoo.jpg`}}
-          />
-          <View style={styles.row}>
-            <View style={styles.box1}>
-              <CardTitle
-                subtitle="Data"
-              />
-              <CardContent text={`Name`} />
-              <CardContent text={`Description`} />
-              <CardContent text={`Taken`} />
-            </View>
-            <View style={styles.box2} >
-              <CardTitle
-                  subtitle={`More data`}
-              />
-              <CardContent text={`something`} />
-              <CardContent text={`something`} />
-              <CardContent text={`something`} />
-              <CardAction 
-                separator={true}
-                inColumn={true}>
-              </CardAction>
-            </View>
-          </View>
-        </Card>*/}
-      </View>
+          keyExtractor={(item, index) => index.toString()}
+        />
+        </SafeAreaView>
     )
   }
-
-} // class
+}
 
 const styles = StyleSheet.create({
   column: {

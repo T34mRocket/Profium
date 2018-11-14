@@ -6,8 +6,6 @@ const imageWidth = (Dimensions.get("window").width / 2) - 10
 
 const ImageCardListItem = ({ props, name, imageUrl }) => {
 
-  console.log("imageUrl: " + imageUrl)
-
   return (
     <Card>
       <CardTitle
@@ -27,6 +25,7 @@ export default ImageCardListItem
 
 const styles = StyleSheet.create({
   image: {
+    backgroundColor: 'white',
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',

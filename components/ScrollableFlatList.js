@@ -2,24 +2,22 @@ import React from 'react'
 import { Text, TouchableOpacity, FlatList, StyleSheet } from 'react-native'
 import '../api/API'
 
-const ScrollableFlatList = ({ topLevelProps, onClickProp }) => {
+const ScrollableFlatList = ({ data, onCategoryItemPress }) => {
 
   return (
     <FlatList 
-      style = {{maxHeight:50}}
+      style = {{ maxHeight: 60}}
       horizontal            
       showsHorizontalScrollIndicator = {false}
-      data = {topLevelProps}
-      renderItem = {({ item: rowData }) => {
+      data = {data}
+      renderItem={({ item: rowData }) => {
 
         return (
           <TouchableOpacity
-            style = {styles.button}
-            onPress = {() => { 
-              console.log(`pressed ${rowData}`)
-              onClickProp(rowData)
-            }}
-            delayPressIn = {50}
+            style={styles.button}
+            /*onPress={this.props.onMainCategoryPress(rowData)}*/
+            onPress={() => {onCategoryItemPress(rowData); console.log("this is sub category "+rowData)}}
+            delayPressIn={ 50 }
           >
             <Text>{rowData}</Text>
           </TouchableOpacity>
@@ -41,10 +39,12 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     backgroundColor: '#fff',
     elevation: 4, // Android
-    maxHeight: 36,
+    height: 36,
     justifyContent: 'center',
     alignItems: 'center',
-    margin: 5,
+    marginLeft: 5,
+    marginRight:5,
+    marginBottom:8,
     padding: 5
   }
 })
