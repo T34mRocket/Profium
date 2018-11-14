@@ -62,22 +62,24 @@ export default API = {
         
         // console.log("JSON: " + JSON.stringify(result))
 
-        // console.log("query result from parse: " + result)
         const results = result.sparql.results[0].result
-        // console.log("truncated JSON: " + JSON.stringify(results));
+        // console.log("truncated JSON: " + JSON.stringify(results))
+        
+        if (results !== undefined && results !== null) { 
 
-        results.map(item => {
-          
-          // turn it into a switch if more return formats emerge... NOTE: always check what is actually returned from the server, 
-          // before trying to work with the returned result!
-          if (useUri === true) {
+          results.map(item => {
             
-            resultsSet.add(item.binding[0].uri[0])
-          } else {     
-            resultsSet.add(item.binding[0].literal[0]._)
-          }
-        })
-      })
+            // turn it into a switch if more return formats emerge... NOTE: always check what is actually returned from the server, 
+            // before trying to work with the returned result!
+            if (useUri === true) {
+              
+              resultsSet.add(item.binding[0].uri[0])
+            } else {     
+              resultsSet.add(item.binding[0].literal[0]._)
+            }
+          }) // map
+        } // if
+      }) // parseXml
       // console.log("query resultsSet: " + resultsSet)
       return resultsSet
     })

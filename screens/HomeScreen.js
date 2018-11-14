@@ -26,6 +26,7 @@ import API from '../api/API'
 
 // temporary fake data for search results list
 // TODO: delete when we get data from SPARQL DB
+/*
 const data = [
   {
     name: "something",
@@ -52,6 +53,8 @@ const data = [
     imageUrl:"https://www.gstatic.com/webp/gallery3/1.png"
   },
 ]
+
+*/
 
 // TODO: delete when we get sub categories from SPARQL DB
 const subCategoryTemporaryData = [
@@ -100,22 +103,24 @@ export default class HomeScreen extends React.Component {
     }
   }
 
-  // passed as a callback to ScrollableFlatList
-  onClickProp = (chosenProp) => {
+  _fetchImagesBasedOnProp = (chosenProp) => {
 
     API.onChoosingPropGetUrls(chosenProp).then( resultsSet => {
 
       const arr = Array.from(resultsSet)
-      console.log("array length: " + arr.length)
-      arr.forEach(item => console.log("item: " + item))
+      // console.log("array length: " + arr.length)
+      // arr.forEach(item => console.log("item: " + item))
       this.setState({
         chosenImages: arr
       })
-      console.log("this.state.chosenImages: " + this.state.chosenImages)
+      // console.log("this.state.chosenImages: " + this.state.chosenImages)
      }) // then
-  }
+  } // fetchImagesBasedOnProp
 
+  // given to ScrollableFlatList as its onCategoryItemPress callback
   _onFlatListItemPress = (item) => {
+
+    this._fetchImagesBasedOnProp(item)
     // console.log("selected "+item)
     this.setState({clickedCategoryItem: item})
 
@@ -139,7 +144,7 @@ export default class HomeScreen extends React.Component {
     }
     
     this.setState({showSubCategory: true})
-  }
+  } // _onFlatListItemPress
 
   render() {
 
@@ -172,14 +177,16 @@ export default class HomeScreen extends React.Component {
         <FlatList 
           style = {{marginTop:5}}
           vertical            
-          data = {data}
+          data = {this.state.chosenImages || []}
           numColumns = { 2 }
           renderItem = {({ item: rowData }) => {
 
+            const convertedRowData = API.displayUrl(rowData)
+            console.log("rowData: " + rowData)
             return (
-                <TouchableWithoutFeedback onPress={() => navigate('Details', { name: rowData.name, imageurl: rowData.imageUrl })}>
+                <TouchableWithoutFeedback onPress={() => navigate('Details', { name: "", imageurl: convertedRowData })}>
                   <View style={styles.box2} >
-                    <ImageCardListItem name={rowData.name} imageUrl={rowData.imageUrl} />
+                    <ImageCardListItem name="" imageUrl={convertedRowData} />
                     </View>
                 </TouchableWithoutFeedback>
             )
