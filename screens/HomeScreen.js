@@ -84,7 +84,6 @@ export default class HomeScreen extends React.Component {
     this.state = {
       topLevelProps: [],
       chosenImages: [], // urls
-      // data: data,
       subCategoryOptions: '',
       showSubCategory: false,
       clickedCategoryItem: '',
@@ -104,7 +103,7 @@ export default class HomeScreen extends React.Component {
         })
       })
     }
-  }
+  } // componentDidMount
 
   _fetchImagesBasedOnProp = (chosenProp) => {
 
@@ -118,14 +117,14 @@ export default class HomeScreen extends React.Component {
       })
       // console.log("this.state.chosenImages: " + this.state.chosenImages)
      }) // then
-  } // fetchImagesBasedOnProp
+  } // _fetchImagesBasedOnProp
 
   // given to ScrollableFlatList as its onCategoryItemPress callback
   _onFlatListItemPress = (item) => {
     var containsFilter = false
     this.state.selectedFiltersArray.forEach((filter) => {
       if(filter == item) {
-        containsFilter = true;
+        containsFilter = true
       }
     })
     if(!containsFilter) {
@@ -218,9 +217,9 @@ export default class HomeScreen extends React.Component {
           keyExtractor={(item, index) => index.toString()}
         />
         </SafeAreaView>
-    )
-  }
-}
+    ) // return
+  } // render
+} // class
 
 const styles = StyleSheet.create({
   column: {
@@ -251,4 +250,4 @@ const styles = StyleSheet.create({
     margin: 5,
     padding: 5
   }
-})
+}) // styles

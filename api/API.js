@@ -97,8 +97,7 @@ export default API = {
 
   onChoosingPropGetUrls: function(chosenProp) {
 
-    // this query could be simplified (I think), but I cba right now
-    const GET_URLS_BASED_ON_PROP = `SELECT DISTINCT ?url WHERE { ${IMAGE_DEPIC_COND} . ?depic ${DOC_SPECIFIER} '${chosenProp}' 
+    const GET_URLS_BASED_ON_PROP = `SELECT DISTINCT ?url WHERE { ?depic ${DOC_SPECIFIER} '${chosenProp}' 
     . ?depic ${DEPICTED_OBJ_INV} ?url }`
     // console.log("query: " + GET_URLS_BASED_ON_PROP)
 
