@@ -105,19 +105,34 @@ export default class HomeScreen extends React.Component {
     }
   } // componentDidMount
 
-  _fetchImagesBasedOnProp = (chosenProp) => {
+  _fetchImagesBasedOnProps = () => {
 
-    API.onChoosingPropGetUrls(chosenProp).then( resultsSet => {
+    // we need to do this so that the state is actually updated when we do this operation...
+    // i'm not sure wtf the problem is because this should absolutely not be necessary.
+    // we could investigate but a 10 ms delay is acceptable imo
+    const self = this // needed due to the inherent funkiness of the setTimeOut function
+    setTimeout(function() {
+      
+      const propsArray = self.state.selectedFiltersArray
+      if (propsArray.length === 0) {
 
-      const arr = Array.from(resultsSet)
-      // console.log("array length: " + arr.length)
-      // arr.forEach(item => console.log("item: " + item))
-      this.setState({
-        chosenImages: arr
-      })
-      // console.log("this.state.chosenImages: " + this.state.chosenImages)
-     }) // then
-  } // _fetchImagesBasedOnProp
+        self.setState({ 
+          chosenImages: [] // remove the images if there are no chosen props
+        })
+        return
+      }
+
+      API.onChoosingPropsGetUrls(propsArray).then( resultsSet => {
+
+        const arr = Array.from(resultsSet)
+        // console.log("array length: " + arr.length)
+        // arr.forEach(item => console.log("item: " + item))
+        self.setState({
+          chosenImages: arr
+        })
+       }) // then
+    }, 10) // setTimeout
+  } // _fetchImagesBasedOnProps
 
   // given to ScrollableFlatList as its onCategoryItemPress callback
   _onFlatListItemPress = (item) => {
@@ -131,9 +146,9 @@ export default class HomeScreen extends React.Component {
       this.setState(prevState => ({
         selectedFiltersArray: [...prevState.selectedFiltersArray, item]
       }))
-    }
+      this._fetchImagesBasedOnProps()
+    } // if
     
-    this._fetchImagesBasedOnProp(item)
     // console.log("selected "+item)
     this.setState({clickedCategoryItem: item})
 
@@ -164,6 +179,7 @@ export default class HomeScreen extends React.Component {
         if(item == filter) {
           // create new array without the filter that user is deleting and set it as the new state
           this.setState(prevState => ({ selectedFiltersArray: prevState.selectedFiltersArray.filter(item => item != filter) }))
+          this._fetchImagesBasedOnProps() // update the visible images based on the change
         }
     })
   } // _deleteSelectedFilter
@@ -174,6 +190,8 @@ export default class HomeScreen extends React.Component {
 
     // console.log(this.state.topLevelProps)
     // 'https://upload.wikimedia.org/wikipedia/commons/f/f9/Phoenicopterus_ruber_in_S%C3%A3o_Paulo_Zoo.jpg'
+
+    console.log("props array in render: " + this.state.selectedFiltersArray)
 
     return (
       <SafeAreaView style={{ flex: 1, flexDirection: 'column', justifyContent: 'flex-start', marginTop: StatusBar.currentHeight+5 }}>

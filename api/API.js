@@ -95,18 +95,38 @@ export default API = {
     return this.query(config, false)
   }, // getTopLevelImageProps
 
-  onChoosingPropGetUrls: function(chosenProp) {
+  // takes an array of search terms
+  onChoosingPropsGetUrls: function(chosenProps) {
 
-    const GET_URLS_BASED_ON_PROP = `SELECT DISTINCT ?url WHERE { ?depic ${DOC_SPECIFIER} '${chosenProp}' 
-    . ?depic ${DEPICTED_OBJ_INV} ?url }`
-    // console.log("query: " + GET_URLS_BASED_ON_PROP)
+    const numOfTerms = chosenProps.length
+    let queryString = ''
+    // console.log("numOfTerms: " + numOfTerms)
 
+    if (numOfTerms === 1) {
+      queryString = `SELECT DISTINCT ?url WHERE { ?depic ${DOC_SPECIFIER} '${chosenProps[0]}' 
+      . ?depic ${DEPICTED_OBJ_INV} ?url }`
+    } else {
+
+      queryString = 'SELECT DISTINCT ?url WHERE { '
+
+      chosenProps.map( (term, index) => {
+
+        queryString += `{ ?depic ${DOC_SPECIFIER} '${term}' 
+        . ?depic ${DEPICTED_OBJ_INV} ?url }`
+        if (index !== numOfTerms-1) {
+          queryString += ' UNION '
+        }
+      }) // map
+      queryString += ' }'
+    } // else
+
+    // console.log("query: " + queryString)
     const config = {
-      query: GET_URLS_BASED_ON_PROP
+      query: queryString
     }
     return this.query(config, true)
-     // TODO: set the image order according to some rule (date when the image was taken?)
-  }, // onChoosingPropGetUrls
+     // TODO: set the image order according to the date date when the image was taken
+  }, // onChoosingPropsGetUrls
 
   smallImageDisplayUrl: function(imageUrl) {
   
