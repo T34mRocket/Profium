@@ -172,7 +172,6 @@ export default class HomeScreen extends React.Component {
         {(this.state.showSubCategory) && <ScrollableFlatList
               onCategoryItemPress={this._onFlatListItemPress}
               data = {this.state.subCategoryOptions}
-
         />}
         <FlatList 
           style = {{marginTop:5}}
@@ -181,12 +180,13 @@ export default class HomeScreen extends React.Component {
           numColumns = { 2 }
           renderItem = {({ item: rowData }) => {
 
-            const convertedRowData = API.displayUrl(rowData)
-            console.log("rowData: " + rowData)
+            const smallImageUrl = API.smallImageDisplayUrl(rowData)
+            const fullImageUrl = API.fulllImageDisplayUrl(rowData) // shown when opening the image details
+            // console.log("rowData: " + rowData)
             return (
-                <TouchableWithoutFeedback onPress={() => navigate('Details', { name: "", imageurl: convertedRowData })}>
+                <TouchableWithoutFeedback onPress={() => navigate('Details', { name: "", imageurl: fullImageUrl })}>
                   <View style={styles.box2} >
-                    <ImageCardListItem name="" imageUrl={convertedRowData} />
+                    <ImageCardListItem name="" imageUrl={smallImageUrl}/>
                     </View>
                 </TouchableWithoutFeedback>
             )

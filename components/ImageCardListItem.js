@@ -4,7 +4,7 @@ import { Card, CardTitle, CardContent, CardAction, CardButton, CardImage } from 
 
 const imageWidth = (Dimensions.get("window").width / 2) - 10
 
-const ImageCardListItem = ({ props, name, imageUrl }) => {
+const ImageCardListItem = ({ name, imageUrl }) => {
 
   return (
     <Card>

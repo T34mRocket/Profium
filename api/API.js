@@ -109,9 +109,14 @@ export default API = {
      // TODO: set the image order according to some rule (date when the image was taken?)
   }, // onChoosingPropGetUrls
 
-  displayUrl(imageUrl) {
+  smallImageDisplayUrl: function(imageUrl) {
   
     return `${DISPLAY_URL_START}${imageUrl}${IMG_TYPE_LARGE_THUMB}`
+  },
+
+  fulllImageDisplayUrl: function(imageUrl) {
+
+    return `${DISPLAY_URL_START}${imageUrl}${IMG_TYPE_NORMAL}`
   }
 
 } // API
