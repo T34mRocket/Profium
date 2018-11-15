@@ -1,39 +1,33 @@
 import React from 'react'
-import { Text, TouchableOpacity, FlatList, StyleSheet, View } from 'react-native'
-
-import '../api/API'
+import { FlatList, StyleSheet, View } from 'react-native'
+import { Chip } from 'react-native-paper'
 import HierarchySeparatorLine from './HierarchySeparatorLine';
 
-const ScrollableFlatList = ({ data, onCategoryItemPress }) => {
+const SelectedFiltersFlatList = ({ data, onDelete }) => {
 
   return (
     <View>
-      <FlatList 
+        <FlatList 
         style = {{ height: 40, maxHeight: 40}}
         horizontal            
         showsHorizontalScrollIndicator = {false}
         data = {data}
         renderItem={({ item: rowData }) => {
 
-          return (
-            <TouchableOpacity
-              style={styles.button}
-              /*onPress={this.props.onMainCategoryPress(rowData)}*/
-              onPress={() => {onCategoryItemPress(rowData); console.log("this is sub category "+rowData)}}
-              delayPressIn={ 50 }
-            >
-              <Text>{rowData}</Text>
-            </TouchableOpacity>
-          )
+            return (
+            <Chip onPress={() => {}} onClose={() => {onDelete(rowData)}} style={styles.chip}>
+                {rowData}
+            </Chip>
+            )
         }}
         keyExtractor = {(item, index) => index.toString()}
-      />
-      <HierarchySeparatorLine/>
+        />
+        <HierarchySeparatorLine/>
     </View>
   )
 }
 
-export default ScrollableFlatList
+export default SelectedFiltersFlatList
   
 const styles = StyleSheet.create({
   button: {
@@ -51,5 +45,9 @@ const styles = StyleSheet.create({
     marginRight:5,
     marginBottom:8,
     padding: 5
-  }
+  },
+  chip: {
+    backgroundColor: '#fff',
+    margin: 4,
+  },
 })

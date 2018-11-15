@@ -23,6 +23,8 @@ import { Card, CardTitle, CardContent, CardAction, CardButton, CardImage } from 
 import ScrollableFlatList from '../components/ScrollableFlatList'
 import ImageCardListItem from '../components/ImageCardListItem'
 import API from '../api/API'
+import HierarchySeparatorLine from '../components/HierarchySeparatorLine';
+import SelectedFiltersFlatList from '../components/SelectedFiltersFlatList';
 
 // temporary fake data for search results list
 // TODO: delete when we get data from SPARQL DB
@@ -85,7 +87,8 @@ export default class HomeScreen extends React.Component {
       // data: data,
       subCategoryOptions: '',
       showSubCategory: false,
-      clickedCategoryItem: ''
+      clickedCategoryItem: '',
+      selectedFiltersArray: []
     }
   }
 
@@ -119,7 +122,18 @@ export default class HomeScreen extends React.Component {
 
   // given to ScrollableFlatList as its onCategoryItemPress callback
   _onFlatListItemPress = (item) => {
-
+    var containsFilter = false
+    this.state.selectedFiltersArray.forEach((filter) => {
+      if(filter == item) {
+        containsFilter = true;
+      }
+    })
+    if(!containsFilter) {
+      this.setState(prevState => ({
+        selectedFiltersArray: [...prevState.selectedFiltersArray, item]
+      }))
+    }
+    
     this._fetchImagesBasedOnProp(item)
     // console.log("selected "+item)
     this.setState({clickedCategoryItem: item})
@@ -146,6 +160,15 @@ export default class HomeScreen extends React.Component {
     this.setState({showSubCategory: true})
   } // _onFlatListItemPress
 
+  _deleteSelectedFilter = (filter) => {
+    this.state.selectedFiltersArray.forEach((item, index) => {
+        if(item == filter) {
+          // create new array without the filter that user is deleting and set it as the new state
+          this.setState(prevState => ({ selectedFiltersArray: prevState.selectedFiltersArray.filter(item => item != filter) }))
+        }
+    })
+  } // _deleteSelectedFilter
+
   render() {
 
     const { navigate } = this.props.navigation
@@ -156,23 +179,24 @@ export default class HomeScreen extends React.Component {
     return (
       <SafeAreaView style={{ flex: 1, flexDirection: 'column', justifyContent: 'flex-start', marginTop: StatusBar.currentHeight+5 }}>
 
+        {(this.state.selectedFiltersArray.length > 0) && 
+          <SelectedFiltersFlatList
+                data = {this.state.selectedFiltersArray}
+                onDelete = {this._deleteSelectedFilter}
+          />
+        }
         <ScrollableFlatList
               onCategoryItemPress={this._onFlatListItemPress}
               data = {this.state.topLevelProps}
               // onClickProp = {this.onClickProp} // pass the callback... I hate React -.-
         />
-        <View
-          style={{
-            borderBottomColor: 'grey',
-            borderBottomWidth: 1,
-            margin: 5
-          }}
-        />
         {/*Show the new sub category FlatList when clicking item from Main category FlatList*/}
-        {(this.state.showSubCategory) && <ScrollableFlatList
+        {(this.state.showSubCategory) && 
+          <ScrollableFlatList
               onCategoryItemPress={this._onFlatListItemPress}
               data = {this.state.subCategoryOptions}
-        />}
+          />
+        }
         <FlatList 
           style = {{marginTop:5}}
           vertical            
