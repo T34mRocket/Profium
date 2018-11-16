@@ -9,6 +9,8 @@
     "eject": "expo eject",
     "test": "node ./node_modules/jest/bin/jest.js --watchAll"
   },
+  "homepage": "https://camcanh.github.io/T34mRocket/Profium",
+
   "jest": {
     "preset": "jest-expo"
   },
@@ -17,7 +19,9 @@
     "expo": "^31.0.2",
     "react": "16.5.0",
     "react-native": "https://github.com/expo/react-native/archive/sdk-31.0.0.tar.gz",
+    "react-native-cards": "^1.1.4",
     "react-native-custom-picker": "^0.3.1",
+    "react-native-xml2js": "^1.0.3",
     "react-navigation": "^2.18.2"
   },
   "devDependencies": {
