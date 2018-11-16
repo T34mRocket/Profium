@@ -19,8 +19,10 @@ export default class DetailsScreen extends React.Component {
                 subtitle={this.props.navigation.state.params.name}
                 style={{ maxHeight: 50 }}
           />
-          <CardImage 
+          <CardImage
+            style={styles.image} 
             source={{uri: this.props.navigation.state.params.imageurl}}
+            resizeMode = {'contain'}
           />
           <View style={styles.row}>
             <View style={styles.box1}>
@@ -81,5 +83,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     margin: 5,
     padding: 5
+  },
+  image:{
+    backgroundColor: '#fff'
   }
 })
