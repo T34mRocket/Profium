@@ -2,8 +2,6 @@ import React from 'react'
 import { StyleSheet, Dimensions } from 'react-native'
 import { Card, CardTitle, CardContent, CardAction, CardButton, CardImage } from 'react-native-cards'
 
-const imageWidth = (Dimensions.get("window").width / 2) - 10
-
 const ImageCardListItem = ({ name, imageUrl }) => {
 
   return (

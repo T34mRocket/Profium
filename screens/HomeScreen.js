@@ -25,6 +25,7 @@ import ImageCardListItem from '../components/ImageCardListItem'
 import API from '../api/API'
 import HierarchySeparatorLine from '../components/HierarchySeparatorLine';
 import SelectedFiltersFlatList from '../components/SelectedFiltersFlatList';
+import TimeLineSlider from '../components/TimeLineSlider';
 
 // temporary fake data for search results list
 // TODO: delete when we get data from SPARQL DB
@@ -87,7 +88,9 @@ export default class HomeScreen extends React.Component {
       subCategoryOptions: '',
       showSubCategory: false,
       clickedCategoryItem: '',
-      selectedFiltersArray: []
+      selectedFiltersArray: [],
+      multiSliderValue: [1960, (new Date()).getFullYear()],
+      showSlider: false,
     }
   }
 
@@ -184,6 +187,12 @@ export default class HomeScreen extends React.Component {
     })
   } // _deleteSelectedFilter
 
+  _multiSliderValuesChange = values => {
+    this.setState({
+      multiSliderValue: values,
+    });
+  };
+
   render() {
 
     const { navigate } = this.props.navigation
@@ -194,7 +203,7 @@ export default class HomeScreen extends React.Component {
     console.log("props array in render: " + this.state.selectedFiltersArray)
 
     return (
-      <SafeAreaView style={{ flex: 1, flexDirection: 'column', justifyContent: 'flex-start', marginTop: StatusBar.currentHeight+5 }}>
+      <SafeAreaView style={ styles.container }>
 
         {(this.state.selectedFiltersArray.length > 0) && 
           <SelectedFiltersFlatList
@@ -214,6 +223,10 @@ export default class HomeScreen extends React.Component {
               data = {this.state.subCategoryOptions}
           />
         }
+        {(this.state.showSlider) && 
+          <TimeLineSlider selectedStartYear={this.state.multiSliderValue[0]} selectedEndYear={this.state.multiSliderValue[1]} multiSliderValuesChange={this._multiSliderValuesChange} />
+        }
+        <Button title="Toggle" onPress={()=> {this.setState(prevState => ({ showSlider: !prevState.showSlider }))}}></Button>
         <FlatList 
           style = {{marginTop:5}}
           vertical            
@@ -228,7 +241,7 @@ export default class HomeScreen extends React.Component {
                 <TouchableWithoutFeedback onPress={() => navigate('Details', { name: "", imageurl: fullImageUrl })}>
                   <View style={styles.box2} >
                     <ImageCardListItem name="" imageUrl={smallImageUrl}/>
-                    </View>
+                  </View>
                 </TouchableWithoutFeedback>
             )
           }}
@@ -240,6 +253,12 @@ export default class HomeScreen extends React.Component {
 } // class
 
 const styles = StyleSheet.create({
+  container: {
+    flex: 1, 
+    flexDirection: 'column', 
+    justifyContent: 'flex-start', 
+    marginTop: StatusBar.currentHeight+5 
+  },
   column: {
     flex: 1,
     flexDirection: "column"
@@ -267,5 +286,5 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     margin: 5,
     padding: 5
-  }
+  },
 }) // styles
