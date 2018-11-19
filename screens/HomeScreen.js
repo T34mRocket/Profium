@@ -22,7 +22,7 @@ import { CustomPicker } from 'react-native-custom-picker'
 import { Card, CardTitle, CardContent, CardAction, CardButton, CardImage } from 'react-native-cards'
 import ScrollableFlatList from '../components/ScrollableFlatList'
 import ImageCardListItem from '../components/ImageCardListItem'
-import API from '../api/API'
+import API, { QUERY_TYPE } from '../api/API'
 import HierarchySeparatorLine from '../components/HierarchySeparatorLine';
 import SelectedFiltersFlatList from '../components/SelectedFiltersFlatList';
 
@@ -105,7 +105,7 @@ export default class HomeScreen extends React.Component {
     }
   } // componentDidMount
 
-  _fetchImagesBasedOnProps = () => {
+  _fetchImagesBasedOnProps = (queryType) => {
 
     // we need to do this so that the state is actually updated when we do this operation...
     // i'm not sure wtf the problem is because this should absolutely not be necessary.
@@ -122,7 +122,7 @@ export default class HomeScreen extends React.Component {
         return
       }
 
-      API.onChoosingPropsGetUrls(propsArray).then( resultsSet => {
+      API.onChoosingPropsGetUrls(propsArray, queryType).then( resultsSet => {
 
         const arr = Array.from(resultsSet)
         // console.log("array length: " + arr.length)
@@ -146,7 +146,7 @@ export default class HomeScreen extends React.Component {
       this.setState(prevState => ({
         selectedFiltersArray: [...prevState.selectedFiltersArray, item]
       }))
-      this._fetchImagesBasedOnProps()
+      this._fetchImagesBasedOnProps(QUERY_TYPE.AND)
     } // if
     
     // console.log("selected "+item)
@@ -179,7 +179,7 @@ export default class HomeScreen extends React.Component {
         if(item == filter) {
           // create new array without the filter that user is deleting and set it as the new state
           this.setState(prevState => ({ selectedFiltersArray: prevState.selectedFiltersArray.filter(item => item != filter) }))
-          this._fetchImagesBasedOnProps() // update the visible images based on the change
+          this._fetchImagesBasedOnProps(QUERY_TYPE.AND) // update the visible images based on the change
         }
     })
   } // _deleteSelectedFilter

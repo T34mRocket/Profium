@@ -34,6 +34,13 @@ const GET_ALL_TOP_LVL_PROPS = `SELECT DISTINCT ?prop WHERE { ${IMAGE_DEPIC_COND}
 // const GET_ALL_VIEWS = `SELECT ?view WHERE { ${IMAGE_DEPIC_COND} . ?depic ${VIEW} ?view }`
 // const GET_ALL_LARGE_THUMBNAIL_URLS = `SELECT ?url WHERE { ?img a ${IMAGE} . ?img ${LARGE_THUMBNAIL_URL} ?url }`
 
+export const QUERY_TYPE = {
+
+  AND: { string: '.' },
+  OR: { string: 'UNION' },
+  NEG: { string: 'NOT EXISTS' }
+}
+
 // I made it into an object because of the way that the queries work...
 // we'll have to see if it causes any unpleasant side effects.
 export default API = {
@@ -48,7 +55,7 @@ export default API = {
       },
       body: `${QUERY_START}${config.query}`
     }
-    // console.log("body: " + options.body)
+    console.log("body: " + options.body)
 
     // using await + async would be better, but it's easier to do this since it's familiar
     return fetch(request, options)
@@ -96,8 +103,18 @@ export default API = {
   }, // getTopLevelImageProps
 
   // takes an array of search terms
-  onChoosingPropsGetUrls: function(chosenProps) {
+  // queryType comes from enum in this file
+  onChoosingPropsGetUrls: function(chosenProps, queryType) {
 
+    let queryOp = ''
+
+    if (queryType !== null && queryType !== undefined) {
+      for (let prop in queryType) {
+        if (queryType.hasOwnProperty(prop)) {
+          queryOp = queryType['string']
+        }
+      }
+    }
     const numOfTerms = chosenProps.length
     let queryString = ''
     // console.log("numOfTerms: " + numOfTerms)
@@ -107,17 +124,40 @@ export default API = {
       . ?depic ${DEPICTED_OBJ_INV} ?url }`
     } else {
 
-      queryString = 'SELECT DISTINCT ?url WHERE { '
+      switch(queryType) {
 
-      chosenProps.map( (term, index) => {
+        case QUERY_TYPE.OR:
+          queryString = 'SELECT DISTINCT ?url WHERE { '
 
-        queryString += `{ ?depic ${DOC_SPECIFIER} '${term}' 
-        . ?depic ${DEPICTED_OBJ_INV} ?url }`
-        if (index !== numOfTerms-1) {
-          queryString += ' UNION '
-        }
-      }) // map
-      queryString += ' }'
+          chosenProps.map( (term, index) => {
+
+            queryString += `{ ?depic ${DOC_SPECIFIER} '${term}' 
+            . ?depic ${DEPICTED_OBJ_INV} ?url }`
+            if (index !== numOfTerms-1) {
+              queryString += ` ${queryOp} `
+            }
+          }) // map
+          queryString += ' }'
+        break
+        case QUERY_TYPE.AND:
+        queryString = 'SELECT DISTINCT ?url WHERE { '
+
+        chosenProps.map( (term, index) => {
+
+          queryString += `?depic ${DOC_SPECIFIER} '${term}' 
+          . ?depic ${DEPICTED_OBJ_INV} ?url`
+          if (index !== numOfTerms-1) {
+            queryString += ` ${queryOp} `
+          }
+        }) // map
+        queryString += ' }'
+
+        break
+        case QUERY_TYPE.NEG:
+        break
+        default:
+        break
+      } // switch
     } // else
 
     // console.log("query: " + queryString)
@@ -125,7 +165,7 @@ export default API = {
       query: queryString
     }
     return this.query(config, true)
-     // TODO: set the image order according to the date date when the image was taken
+     // TODO: set the image order according to the date when the image was taken
   }, // onChoosingPropsGetUrls
 
   smallImageDisplayUrl: function(imageUrl) {
