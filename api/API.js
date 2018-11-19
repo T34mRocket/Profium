@@ -129,7 +129,7 @@ export default API = {
             }
           }) // forEach
           queryString += ' }'
-        break
+          break
         case this.QUERY_TYPE.AND:
         queryString = 'SELECT DISTINCT ?url WHERE { '
 
@@ -143,11 +143,11 @@ export default API = {
         }) // forEach
         queryString += ' }'
 
-        break
+          break
         case this.QUERY_TYPE.NEG:
-        break
+          break
         default:
-        break
+          break
       } // switch
     } // else
 
