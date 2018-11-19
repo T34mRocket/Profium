@@ -146,7 +146,7 @@ export default class HomeScreen extends React.Component {
       this.setState(prevState => ({
         selectedFiltersArray: [...prevState.selectedFiltersArray, item]
       }))
-      this._fetchImagesBasedOnProps(QUERY_TYPE.AND)
+      this._fetchImagesBasedOnProps(API.QUERY_TYPE.AND)
     } // if
     
     // console.log("selected "+item)
@@ -179,7 +179,7 @@ export default class HomeScreen extends React.Component {
         if(item == filter) {
           // create new array without the filter that user is deleting and set it as the new state
           this.setState(prevState => ({ selectedFiltersArray: prevState.selectedFiltersArray.filter(item => item != filter) }))
-          this._fetchImagesBasedOnProps(QUERY_TYPE.AND) // update the visible images based on the change
+          this._fetchImagesBasedOnProps(API.QUERY_TYPE.AND) // update the visible images based on the change
         }
     })
   } // _deleteSelectedFilter

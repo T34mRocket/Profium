@@ -34,16 +34,16 @@ const GET_ALL_TOP_LVL_PROPS = `SELECT DISTINCT ?prop WHERE { ${IMAGE_DEPIC_COND}
 // const GET_ALL_VIEWS = `SELECT ?view WHERE { ${IMAGE_DEPIC_COND} . ?depic ${VIEW} ?view }`
 // const GET_ALL_LARGE_THUMBNAIL_URLS = `SELECT ?url WHERE { ?img a ${IMAGE} . ?img ${LARGE_THUMBNAIL_URL} ?url }`
 
-export const QUERY_TYPE = {
-
-  AND: { string: '.' },
-  OR: { string: 'UNION' },
-  NEG: { string: 'NOT EXISTS' }
-}
-
 // I made it into an object because of the way that the queries work...
 // we'll have to see if it causes any unpleasant side effects.
 export default API = {
+
+  QUERY_TYPE: {
+
+    AND: '.',
+    OR: 'UNION',
+    NEG: 'NOT EXISTS'
+  },
 
   query: function(config, useUri) {
 
@@ -106,15 +106,6 @@ export default API = {
   // queryType comes from enum in this file
   onChoosingPropsGetUrls: function(chosenProps, queryType) {
 
-    let queryOp = ''
-
-    if (queryType !== null && queryType !== undefined) {
-      for (let prop in queryType) {
-        if (queryType.hasOwnProperty(prop)) {
-          queryOp = queryType['string']
-        }
-      }
-    }
     const numOfTerms = chosenProps.length
     let queryString = ''
     // console.log("numOfTerms: " + numOfTerms)
@@ -126,34 +117,34 @@ export default API = {
 
       switch(queryType) {
 
-        case QUERY_TYPE.OR:
+        case this.QUERY_TYPE.OR:
           queryString = 'SELECT DISTINCT ?url WHERE { '
 
-          chosenProps.map( (term, index) => {
+          chosenProps.forEach( (term, index) => {
 
             queryString += `{ ?depic ${DOC_SPECIFIER} '${term}' 
             . ?depic ${DEPICTED_OBJ_INV} ?url }`
             if (index !== numOfTerms-1) {
-              queryString += ` ${queryOp} `
+              queryString += ` ${this.QUERY_TYPE.OR} `
             }
-          }) // map
+          }) // forEach
           queryString += ' }'
         break
-        case QUERY_TYPE.AND:
+        case this.QUERY_TYPE.AND:
         queryString = 'SELECT DISTINCT ?url WHERE { '
 
-        chosenProps.map( (term, index) => {
+        chosenProps.forEach( (term, index) => {
 
           queryString += `?depic ${DOC_SPECIFIER} '${term}' 
           . ?depic ${DEPICTED_OBJ_INV} ?url`
           if (index !== numOfTerms-1) {
-            queryString += ` ${queryOp} `
+            queryString += ` ${this.QUERY_TYPE.AND} `
           }
-        }) // map
+        }) // forEach
         queryString += ' }'
 
         break
-        case QUERY_TYPE.NEG:
+        case this.QUERY_TYPE.NEG:
         break
         default:
         break
