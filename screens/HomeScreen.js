@@ -87,7 +87,13 @@ export default class HomeScreen extends React.Component {
       subCategoryOptions: '',
       showSubCategory: false,
       clickedCategoryItem: '',
-      selectedFiltersArray: []
+      selectedFiltersArray: [],
+      startDate: '2010-04-28T05:13:00', // these need to be made dynamic (based on the slider)
+      endDate: '2017-04-28T05:13:22'
+      // IMPORTANT NOTE: it seems that all the images under our categories have the same timestamp; 
+      // if I alter the end date to be before that time ('2017-04-28T05:13:21'), no images are returned.
+      // unless the timestamps are updated to be more variable, our timeline feature is both useless
+      // and almost impossible to test for proper functionality
     }
   }
 
@@ -122,9 +128,9 @@ export default class HomeScreen extends React.Component {
         return
       }
 
-      API.onChoosingPropsGetUrls(propsArray, queryType).then( resultsSet => {
+      API.onChoosingPropsGetUrls(propsArray, queryType, self.state.startDate, self.state.endDate).then( resultsSet => {
 
-        const arr = Array.from(resultsSet)
+        const arr = Array.from(resultsSet) // needs a check to see if it's a Set !
         // console.log("array length: " + arr.length)
         // arr.forEach(item => console.log("item: " + item))
         self.setState({
@@ -136,7 +142,7 @@ export default class HomeScreen extends React.Component {
 
   // given to ScrollableFlatList as its onCategoryItemPress callback
   _onFlatListItemPress = (item) => {
-    var containsFilter = false
+    let containsFilter = false
     this.state.selectedFiltersArray.forEach((filter) => {
       if(filter == item) {
         containsFilter = true
@@ -191,7 +197,7 @@ export default class HomeScreen extends React.Component {
     // console.log(this.state.topLevelProps)
     // 'https://upload.wikimedia.org/wikipedia/commons/f/f9/Phoenicopterus_ruber_in_S%C3%A3o_Paulo_Zoo.jpg'
 
-    console.log("props array in render: " + this.state.selectedFiltersArray)
+    // console.log("props array in render: " + this.state.selectedFiltersArray)
 
     return (
       <SafeAreaView style={{ flex: 1, flexDirection: 'column', justifyContent: 'flex-start', marginTop: StatusBar.currentHeight+5 }}>

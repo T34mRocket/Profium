@@ -11,10 +11,13 @@ const REMOTE_END_POINT = 'https://m1.profium.com/servlet/QueryServlet?'
 const IMAGE = '<http://www.profium.com/archive/Image>'
 const DEPICTED_OBJ = '<http://www.profium.com/archive/depictedObject>'
 const DEPICTED_OBJ_INV = '<http://www.profium.com/archive/depictedObjectInverse>'
+const MOD_DATE = '<http://www.profium.com/city/muokkausaika>'
+const DATE_FORMAT = '<http://www.w3.org/2001/XMLSchema#dateTime>'
 const THUMBNAIL_URL = '<http://www.profium.com/imagearchive/2007/thumbnail>' // what's in /contract-archive ??
 const LARGE_THUMBNAIL_URL = '<http://www.profium.com/imagearchive/2007/largeThumbnail>'
 const NORMAL_IMAGE_URL = '<http://www.profium.com/imagearchive/2007/normal>'
 const DISPLAY_URL_START = 'https://m1.profium.com/displayContent.do?uri='
+const ORDER_BY_DATE_DESC = 'ORDER BY DESC(?date)'
 
 const IMG_TYPE_THUMB = '&type=thumb'
 const IMG_TYPE_LARGE_THUMB = '&type=largeThumb'
@@ -49,13 +52,13 @@ export default API = {
 
     const request = REMOTE_END_POINT
     const options = {
-      method: 'POST', // 'GET' gives an error for some reason
+      method: 'POST', // change to 'GET' now that it works
       headers: {
           'Content-Type': 'application/x-www-form-urlencoded'
       },
       body: `${QUERY_START}${config.query}`
     }
-    console.log("body: " + options.body)
+    // console.log("body: " + options.body)
 
     // using await + async would be better, but it's easier to do this since it's familiar
     return fetch(request, options)
@@ -74,7 +77,7 @@ export default API = {
         
         if (results !== undefined && results !== null) { 
 
-          results.map(item => {
+          results.forEach(item => {
             
             // turn it into a switch if more return formats emerge... NOTE: always check what is actually returned from the server, 
             // before trying to work with the returned result!
@@ -84,7 +87,7 @@ export default API = {
             } else {     
               resultsSet.add(item.binding[0].literal[0]._)
             }
-          }) // map
+          }) // forEach
         } // if
       }) // parseXml
       // console.log("query resultsSet: " + resultsSet)
@@ -102,23 +105,30 @@ export default API = {
     return this.query(config, false)
   }, // getTopLevelImageProps
 
-  // takes an array of search terms
-  // queryType comes from enum in this file
-  onChoosingPropsGetUrls: function(chosenProps, queryType) {
+  // first param is an array of search terms.
+  // queryType comes from enum in this file.
+  // startDate and endDate need to be properties in HomeScreen's state (set by moving the slider); 
+  // default values can be something like 01.01.2000 and the current date/timestamp 
+  // (formatted correctly like this: '2017-04-28T05:13:22').
+  onChoosingPropsGetUrls: function(chosenProps, queryType, startDate, endDate) {
 
     const numOfTerms = chosenProps.length
     let queryString = ''
-    // console.log("numOfTerms: " + numOfTerms)
 
+    // there's some duplicate code, but it's better for readability to contain each query within its own block
     if (numOfTerms === 1) {
-      queryString = `SELECT DISTINCT ?url WHERE { ?depic ${DOC_SPECIFIER} '${chosenProps[0]}' 
-      . ?depic ${DEPICTED_OBJ_INV} ?url }`
+
+      // '%26%26' == '&&' in this bizarro world
+      queryString = `SELECT DISTINCT ?url WHERE { ?depic ${MOD_DATE} ?date 
+      . ?depic ${DOC_SPECIFIER} '${chosenProps[0]}' 
+      . ?depic ${DEPICTED_OBJ_INV} ?url FILTER ( ?date >= '${startDate}'^^${DATE_FORMAT} %26%26 ?date <= '${endDate}'^^${DATE_FORMAT} ) } ${ORDER_BY_DATE_DESC}`
     } else {
 
       switch(queryType) {
 
         case this.QUERY_TYPE.OR:
-          queryString = 'SELECT DISTINCT ?url WHERE { '
+
+          queryString = `SELECT DISTINCT ?url WHERE { ?depic ${MOD_DATE} ?date . `
 
           chosenProps.forEach( (term, index) => {
 
@@ -128,24 +138,28 @@ export default API = {
               queryString += ` ${this.QUERY_TYPE.OR} `
             }
           }) // forEach
-          queryString += ' }'
+          queryString += ` FILTER ( ?date >= '${startDate}'^^${DATE_FORMAT} %26%26 ?date <= '${endDate}'^^${DATE_FORMAT} ) } ${ORDER_BY_DATE_DESC}`
           break
+
         case this.QUERY_TYPE.AND:
-        queryString = 'SELECT DISTINCT ?url WHERE { '
 
-        chosenProps.forEach( (term, index) => {
+          queryString = `SELECT DISTINCT ?url WHERE { ?depic ${MOD_DATE} ?date . `
 
-          queryString += `?depic ${DOC_SPECIFIER} '${term}' 
-          . ?depic ${DEPICTED_OBJ_INV} ?url`
-          if (index !== numOfTerms-1) {
-            queryString += ` ${this.QUERY_TYPE.AND} `
-          }
-        }) // forEach
-        queryString += ' }'
+          chosenProps.forEach( (term, index) => {
 
+            queryString += `?depic ${DOC_SPECIFIER} '${term}' 
+            . ?depic ${DEPICTED_OBJ_INV} ?url`
+            if (index !== numOfTerms-1) {
+              queryString += ` ${this.QUERY_TYPE.AND} `
+            }
+          }) // forEach
+          queryString += ` FILTER ( ?date >= '${startDate}'^^${DATE_FORMAT} %26%26 ?date <= '${endDate}'^^${DATE_FORMAT} ) } ${ORDER_BY_DATE_DESC}`
           break
+
         case this.QUERY_TYPE.NEG:
+
           break
+
         default:
           break
       } // switch
@@ -156,7 +170,6 @@ export default API = {
       query: queryString
     }
     return this.query(config, true)
-     // TODO: set the image order according to the date when the image was taken
   }, // onChoosingPropsGetUrls
 
   smallImageDisplayUrl: function(imageUrl) {
