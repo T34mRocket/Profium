@@ -88,12 +88,13 @@ export default class HomeScreen extends React.Component {
     this.state = {
       topLevelProps: [],
       chosenImages: [], // urls
-      subCategoryOptions: '',
+      subCategoryOptions: [],
       showSubCategory: false,
       clickedCategoryItem: '',
       selectedFiltersArray: [],
       multiSliderValue: [1960, (new Date()).getFullYear()],
       showSlider: false,
+      iconArrow: 'chevron-up'
     }
   }
 
@@ -154,7 +155,7 @@ export default class HomeScreen extends React.Component {
       }))
       this._fetchImagesBasedOnProps()
     } // if
-    
+
     // console.log("selected "+item)
     this.setState({clickedCategoryItem: item})
 
@@ -196,8 +197,15 @@ export default class HomeScreen extends React.Component {
     });
   };
 
-  _onSwipeUp(gestureState) {
-    console.log("swiped up")
+  _closeOrOpenSubCategoryFlatList(){
+    console.log("size "+this.state.subCategoryOptions.length+" s "+this.state.showSubCategory)
+    if (this.state.subCategoryOptions.length>0) {
+      var arrowDirection = (this.state.showSubCategory ? "chevron-down" : "chevron-up")
+      this.setState(prevState => ({ 
+        showSubCategory: !prevState.showSubCategory,
+        iconArrow: arrowDirection
+      }))
+    }
   }
 
   render() {
@@ -216,7 +224,8 @@ export default class HomeScreen extends React.Component {
     return (
       <SafeAreaView style={ styles.container }>
         <GestureRecognizer
-          onSwipeUp={(state) => this._onSwipeUp(state)}
+          //onSwipeUp={(state) => this._onSwipeUp(state)}
+          onSwipeUp={() => this._closeOrOpenSubCategoryFlatList()}
           config={config}
         >    
           {(this.state.selectedFiltersArray.length > 0) && 
@@ -246,12 +255,18 @@ export default class HomeScreen extends React.Component {
               <Text style={{alignSelf:'center'}}>Search by time</Text>
             </View>
             <View style={styles.closeSubCategoryBox}>
-              <Icon
-                name='chevron-up'
-                type='entypo'
-                color='#517fa4'
-                onPress={()=>{console.log("pressed up")}}
-              />
+              {/*Show the arrow only if there is subcategory data
+                TODO: The displaying of the arrow is not updating correctly if the flatlist is closed and then a new category is pressed from the list...
+              */}
+              {(this.state.subCategoryOptions.length>0) && 
+                (<Icon
+                  name={this.state.iconArrow}
+                  type='entypo'
+                  color='#517fa4'
+                  onPress={()=>{ this._closeOrOpenSubCategoryFlatList() }}
+                />
+                )
+              }
               {/*<Icon
                 name='chevron-down'
                 type='entypo'
@@ -270,6 +285,8 @@ export default class HomeScreen extends React.Component {
         <FlatList 
           style = {{marginTop:5}}
           vertical            
+          removeClippedSubviews
+          disableVirtualization
           data = {this.state.chosenImages || []}
           numColumns = { 2 }
           renderItem = {({ item: rowData }) => {
