@@ -16,6 +16,9 @@ import {
   SafeAreaView
 } from 'react-native'
 import { WebBrowser } from 'expo'
+import GestureRecognizer, {swipeDirections} from 'react-native-swipe-gestures';
+import { Icon } from 'react-native-elements'
+import { Checkbox } from 'react-native-paper'
 
 import { MonoText } from '../components/StyledText'
 import { CustomPicker } from 'react-native-custom-picker'
@@ -193,9 +196,17 @@ export default class HomeScreen extends React.Component {
     });
   };
 
+  _onSwipeUp(gestureState) {
+    console.log("swiped up")
+  }
+
   render() {
 
     const { navigate } = this.props.navigation
+    const config = {
+      velocityThreshold: 0.3,
+      directionalOffsetThreshold: 80
+    };
 
     // console.log(this.state.topLevelProps)
     // 'https://upload.wikimedia.org/wikipedia/commons/f/f9/Phoenicopterus_ruber_in_S%C3%A3o_Paulo_Zoo.jpg'
@@ -204,29 +215,58 @@ export default class HomeScreen extends React.Component {
 
     return (
       <SafeAreaView style={ styles.container }>
-
-        {(this.state.selectedFiltersArray.length > 0) && 
-          <SelectedFiltersFlatList
-                data = {this.state.selectedFiltersArray}
-                onDelete = {this._deleteSelectedFilter}
-          />
-        }
-        <ScrollableFlatList
-              onCategoryItemPress={this._onFlatListItemPress}
-              data = {this.state.topLevelProps}
-              // onClickProp = {this.onClickProp} // pass the callback... I hate React -.-
-        />
-        {/*Show the new sub category FlatList when clicking item from Main category FlatList*/}
-        {(this.state.showSubCategory) && 
+        <GestureRecognizer
+          onSwipeUp={(state) => this._onSwipeUp(state)}
+          config={config}
+        >    
+          {(this.state.selectedFiltersArray.length > 0) && 
+            <SelectedFiltersFlatList
+                  data = {this.state.selectedFiltersArray}
+                  onDelete = {this._deleteSelectedFilter}
+            />
+          }
           <ScrollableFlatList
-              onCategoryItemPress={this._onFlatListItemPress}
-              data = {this.state.subCategoryOptions}
+                onCategoryItemPress={this._onFlatListItemPress}
+                data = {this.state.topLevelProps}
+                // onClickProp = {this.onClickProp} // pass the callback... I hate React -.-
           />
-        }
+          {/*Show the new sub category FlatList when clicking item from Main category FlatList*/}
+          {(this.state.showSubCategory) && 
+            (<ScrollableFlatList
+                      onCategoryItemPress={this._onFlatListItemPress}
+                      data = {this.state.subCategoryOptions}/>
+            )
+          }
+          <View style={styles.timeCheckboxAndCloseSubCategory}>
+            <View style={styles.timeBox}>
+              <Checkbox
+                status={this.state.showSlider ? 'checked' : 'unchecked'}
+                onPress={() => { this.setState(prevState => ({ showSlider: !prevState.showSlider })) }}
+              />
+              <Text style={{alignSelf:'center'}}>Search by time</Text>
+            </View>
+            <View style={styles.closeSubCategoryBox}>
+              <Icon
+                name='chevron-up'
+                type='entypo'
+                color='#517fa4'
+                onPress={()=>{console.log("pressed up")}}
+              />
+              {/*<Icon
+                name='chevron-down'
+                type='entypo'
+                color='#517fa4'
+                onPress={()=>{console.log("pressed down")}}
+              />*/}
+            </View>
+            {/*Empty view so that the arrow icon is in center of screen*/}
+            <View style={{flex:1}}>
+            </View>
+          </View>
+        </GestureRecognizer>
         {(this.state.showSlider) && 
           <TimeLineSlider selectedStartYear={this.state.multiSliderValue[0]} selectedEndYear={this.state.multiSliderValue[1]} multiSliderValuesChange={this._multiSliderValuesChange} />
         }
-        <Button title="Toggle" onPress={()=> {this.setState(prevState => ({ showSlider: !prevState.showSlider }))}}></Button>
         <FlatList 
           style = {{marginTop:5}}
           vertical            
@@ -286,5 +326,21 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     margin: 5,
     padding: 5
+  }, 
+  timeCheckboxAndCloseSubCategory: {
+    flexDirection: 'row', 
+    justifyContent:'center', 
+    marginLeft: 5, 
+    marginRight: 5
   },
+  timeBox: {
+    flex:1, 
+    flexDirection: 'row'
+  },
+  closeSubCategoryBox: {
+    flex:1, 
+    flexDirection: 'row', 
+    alignSelf:'center', 
+    justifyContent:'center'
+  }
 }) // styles
