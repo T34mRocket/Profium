@@ -46,6 +46,10 @@ const subCategoryTemporaryData2 = [
     "greetings",
 ]
 
+// default dates for the timeline slider
+const DEFAULT_START_DATE = 1960
+const DEFAULT_END_DATE = (new Date()).getFullYear()
+
 export default class HomeScreen extends React.Component {
   static navigationOptions = {
     header: null,
@@ -60,22 +64,20 @@ export default class HomeScreen extends React.Component {
       showSubCategory: false,
       clickedCategoryItem: '',
       selectedFiltersArray: [],
-      startDate: '2010-04-28T05:13:00', // these need to be made dynamic (based on the slider)
-      endDate: '2017-04-28T05:13:22',
       // IMPORTANT NOTE: it seems that all the images under our categories have the same timestamp; 
       // if I alter the end date to be before that time ('2017-04-28T05:13:21'), no images are returned.
       // unless the timestamps are updated to be more variable, our timeline feature is both useless
       // and almost impossible to test for proper functionality
-      multiSliderValue: [1960, (new Date()).getFullYear()],
+      multiSliderValue: [DEFAULT_START_DATE, DEFAULT_END_DATE],
       showSlider: false,
       iconArrow: 'chevron-up'
     }
-  }
+  } // constructor
 
   componentDidMount = () => {
 
     // I'm not sure why tf it needs such an elaborate check, but it doesn't work without it
-    if (typeof this.state.topLevelProps === 'undefined' || this.state.topLevelProps.length <= 0) {
+    if (typeof this.state.topLevelProps === undefined || this.state.topLevelProps.length <= 0) {
 
       API.getTopLevelImageProps().then( resultsSet => {
       
@@ -103,9 +105,16 @@ export default class HomeScreen extends React.Component {
         return
       }
 
-      API.onChoosingPropsGetUrls(propsArray, queryType, self.state.startDate, self.state.endDate).then( resultsSet => {
+      // plate of mom's spaghetti... -.- fix asap! especially once we can search by month!
+      const searchByTime = self.state.showSlider
+      let startDate = searchByTime ? self.state.multiSliderValue[0].toString() : DEFAULT_START_DATE.toString()
+      startDate += '-01-01T00:00:00'
+      let endDate = searchByTime ? self.state.multiSliderValue[1].toString() : DEFAULT_END_DATE.toString() 
+      endDate += '-12-31T23:59:59'
 
-        const arr = Array.from(resultsSet) // needs a check to see if it's a Set !
+      API.onChoosingPropsGetUrls(propsArray, queryType, startDate, endDate).then( resultsSet => {
+
+        const arr = Array.from(resultsSet) // TODO: needs a check to see if it's a Set !
         // console.log("array length: " + arr.length)
         // arr.forEach(item => console.log("item: " + item))
         self.setState({
@@ -168,8 +177,9 @@ export default class HomeScreen extends React.Component {
   _multiSliderValuesChange = values => {
     this.setState({
       multiSliderValue: values,
-    });
-  };
+    })
+    this._fetchImagesBasedOnProps(API.QUERY_TYPE.AND)
+  }
 
   _closeOrOpenSubCategoryFlatList(){
     console.log("size "+this.state.subCategoryOptions.length+" s "+this.state.showSubCategory)
@@ -180,7 +190,7 @@ export default class HomeScreen extends React.Component {
         iconArrow: arrowDirection
       }))
     }
-  }
+  } // _closeOrOpenSubCategoryFlatList
 
   render() {
 
@@ -191,8 +201,6 @@ export default class HomeScreen extends React.Component {
     };
 
     // console.log(this.state.topLevelProps)
-    // 'https://upload.wikimedia.org/wikipedia/commons/f/f9/Phoenicopterus_ruber_in_S%C3%A3o_Paulo_Zoo.jpg'
-
     // console.log("props array in render: " + this.state.selectedFiltersArray)
 
     return (
@@ -211,7 +219,6 @@ export default class HomeScreen extends React.Component {
           <ScrollableFlatList
                 onCategoryItemPress={this._onFlatListItemPress}
                 data = {this.state.topLevelProps}
-                // onClickProp = {this.onClickProp} // pass the callback... I hate React -.-
           />
           {/*Show the new sub category FlatList when clicking item from Main category FlatList*/}
           {(this.state.showSubCategory) && 
@@ -224,7 +231,7 @@ export default class HomeScreen extends React.Component {
             <View style={styles.timeBox}>
               <Checkbox
                 status={this.state.showSlider ? 'checked' : 'unchecked'}
-                onPress={() => { this.setState(prevState => ({ showSlider: !prevState.showSlider })) }}
+                onPress={() => { this.setState(prevState => ({ showSlider: !prevState.showSlider })); this._fetchImagesBasedOnProps(API.QUERY_TYPE.AND) }}
               />
               <Text style={{alignSelf:'center'}}>Search by time</Text>
             </View>
