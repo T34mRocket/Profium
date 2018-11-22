@@ -70,7 +70,7 @@ export default class HomeScreen extends React.Component {
       // and almost impossible to test for proper functionality
       multiSliderValue: [DEFAULT_START_DATE, DEFAULT_END_DATE],
       showSlider: false,
-      iconArrow: 'chevron-up'
+      iconArrow: null
     }
   } // constructor
 
@@ -161,7 +161,7 @@ export default class HomeScreen extends React.Component {
           this.setState({subCategoryOptions: subCategoryTemporaryData })
     }
     
-    this.setState({showSubCategory: true})
+    this.setState({showSubCategory: true, iconArrow: 'chevron-up'})
   } // _onFlatListItemPress
 
   _deleteSelectedFilter = (filter) => {
@@ -236,10 +236,8 @@ export default class HomeScreen extends React.Component {
               <Text style={{alignSelf:'center'}}>Search by time</Text>
             </View>
             <View style={styles.closeSubCategoryBox}>
-              {/*Show the arrow only if there is subcategory data
-                TODO: The displaying of the arrow is not updating correctly if the flatlist is closed and then a new category is pressed from the list...
-              */}
-              {(this.state.subCategoryOptions.length>0) && 
+              {/*Show the arrow only if there is subcategory data*/}
+              {((this.state.subCategoryOptions && this.state.iconArrow)) && 
                 (<Icon
                   name={this.state.iconArrow}
                   type='entypo'
@@ -248,12 +246,6 @@ export default class HomeScreen extends React.Component {
                 />
                 )
               }
-              {/*<Icon
-                name='chevron-down'
-                type='entypo'
-                color='#517fa4'
-                onPress={()=>{console.log("pressed down")}}
-              />*/}
             </View>
             {/*Empty view so that the arrow icon is in center of screen*/}
             <View style={{flex:1}}>
