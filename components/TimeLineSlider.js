@@ -13,6 +13,14 @@ const TimeLineSlider = ({ selectedStartYear, selectedEndYear, multiSliderValuesC
             <Card>
               <View style={styles.multiSlider}>
               <CardContent style={{marginTop:5}} text={`Choose Timeline`} />
+                <View style={styles.sliderTextContainer}>
+                    <View style={styles.boxStartTime}>
+                        <Text style={styles.textStart}>{selectedStartYear} </Text>
+                    </View>
+                    <View style={styles.boxEndTime}>
+                        <Text style={styles.textEnd}>{selectedEndYear}</Text>
+                    </View>
+                </View>
                 <MultiSlider
                   values={[
                     selectedStartYear,
@@ -26,14 +34,6 @@ const TimeLineSlider = ({ selectedStartYear, selectedEndYear, multiSliderValuesC
                   //allowOverlap
                   snapped
                 />
-              </View>
-              <View style={styles.sliderTextContainer}>
-                <View style={styles.boxStartTime}>
-                    <Text style={styles.textStart}>{selectedStartYear} </Text>
-                </View>
-                <View style={styles.boxEndTime}>
-                    <Text style={styles.textEnd}>{selectedEndYear}</Text>
-                </View>
               </View>
             </Card>
           </View>
@@ -58,7 +58,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         marginLeft: 5,
         marginRight: 5,
-        marginBottom: 5,
+        marginTop: 5,
     },
     boxStartTime: {
         flex:1
@@ -70,9 +70,11 @@ const styles = StyleSheet.create({
     textStart: {
         color: 'gray',
         fontSize: 14,
+        marginLeft: 5
     },
     textEnd: {
         color: 'gray',
         fontSize: 14,
+        marginRight: 5
     },
 })
