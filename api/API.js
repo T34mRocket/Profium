@@ -50,6 +50,8 @@ export default API = {
 
   query: function(config, useUri) {
 
+    // console.log("called query")
+
     const request = REMOTE_END_POINT
     const options = {
       method: 'POST', // change to 'GET' now that it works
@@ -77,14 +79,17 @@ export default API = {
         
         if (results !== undefined && results !== null) { 
 
+          // console.log("got results")
           results.forEach(item => {
             
             // turn it into a switch if more return formats emerge... NOTE: always check what is actually returned from the server, 
             // before trying to work with the returned result!
             if (useUri === true) {
               
+              // console.log("in useUri block")
               resultsSet.add(item.binding[0].uri[0])
             } else {     
+              // console.log("in literal block")
               resultsSet.add(item.binding[0].literal[0]._)
             }
           }) // forEach

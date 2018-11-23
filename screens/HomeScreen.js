@@ -79,8 +79,10 @@ export default class HomeScreen extends React.Component {
     // I'm not sure why tf it needs such an elaborate check, but it doesn't work without it
     if (typeof this.state.topLevelProps === undefined || this.state.topLevelProps.length <= 0) {
 
+      console.log("getting topLevelProps")
       API.getTopLevelImageProps().then( resultsSet => {
       
+        console.log("resultsSet: " + resultsSet)
         this.setState({
           topLevelProps: Array.from(resultsSet)
         })
