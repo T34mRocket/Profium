@@ -1,10 +1,12 @@
 import React from 'react'
 import { FlatList, StyleSheet, View } from 'react-native'
 import { Chip } from 'react-native-paper'
-import HierarchySeparatorLine from './HierarchySeparatorLine';
+import HierarchySeparatorLine from './HierarchySeparatorLine'
+import AndContainer from './AndContainer'
 
-const SelectedFiltersFlatList = ({ data, onDelete }) => {
+const SelectedFiltersFlatList = ({ data, onDelete /* reloadImages */ }) => {
 
+  // console.log("type of onDelete in SelectedFiltersFlatList: " + typeof onDelete)
   return (
     <View>
         <FlatList 
@@ -12,13 +14,17 @@ const SelectedFiltersFlatList = ({ data, onDelete }) => {
         horizontal            
         showsHorizontalScrollIndicator = {false}
         data = {data}
-        renderItem={({ item: rowData }) => {
+        renderItem={({ item: andArray, index }) => {
 
-            return (
-            <Chip onPress={() => {}} onClose={() => {onDelete(rowData)}} style={styles.chip}>
-                {rowData}
-            </Chip>
-            )
+          /*
+          andArray.forEach(item => {
+            
+            console.log("andArray item: " + item.term)
+          }) */
+
+          return (
+            <AndContainer searchItems={andArray} onDelete={onDelete} indexInMainArray={index}/>
+          )
         }}
         keyExtractor = {(item, index) => index.toString()}
         />

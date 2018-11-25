@@ -29,6 +29,7 @@ import API, { QUERY_TYPE } from '../api/API'
 import HierarchySeparatorLine from '../components/HierarchySeparatorLine';
 import SelectedFiltersFlatList from '../components/SelectedFiltersFlatList';
 import TimeLineSlider from '../components/TimeLineSlider';
+import QueryData from '../dataclasses/QueryData';
 
 // TODO: delete when we get sub categories from SPARQL DB
 const subCategoryTemporaryData = [
@@ -63,7 +64,7 @@ export default class HomeScreen extends React.Component {
       subCategoryOptions: [],
       showSubCategory: false,
       clickedCategoryItem: '',
-      selectedFiltersArray: [],
+      andArrays: [], // array of arrays of combined elements in one AND-type query (visually, a bunch of dragged together search terms)
       // IMPORTANT NOTE: it seems that all the images under our categories have the same timestamp; 
       // if I alter the end date to be before that time ('2017-04-28T05:13:21'), no images are returned.
       // unless the timestamps are updated to be more variable, our timeline feature is both useless
@@ -79,10 +80,10 @@ export default class HomeScreen extends React.Component {
     // I'm not sure why tf it needs such an elaborate check, but it doesn't work without it
     if (typeof this.state.topLevelProps === undefined || this.state.topLevelProps.length <= 0) {
 
-      console.log("getting topLevelProps")
+      // console.log("getting topLevelProps")
       API.getTopLevelImageProps().then( resultsSet => {
       
-        console.log("resultsSet: " + resultsSet)
+        // console.log("resultsSet: " + resultsSet)
         this.setState({
           topLevelProps: Array.from(resultsSet)
         })
@@ -90,7 +91,7 @@ export default class HomeScreen extends React.Component {
     }
   } // componentDidMount
 
-  _fetchImagesBasedOnProps = (queryType) => {
+  _fetchImagesBasedOnProps = () => {
 
     // we need to do this so that the state is actually updated when we do this operation...
     // i'm not sure wtf the problem is because this should absolutely not be necessary.
@@ -98,11 +99,20 @@ export default class HomeScreen extends React.Component {
     const self = this // needed due to the inherent funkiness of the setTimeOut function
     setTimeout(function() {
       
-      const propsArray = self.state.selectedFiltersArray
-      if (propsArray.length === 0) {
+      const queryArray = self.state.andArrays
+
+      console.log("subArray items: ")
+      queryArray.forEach(andArray => {
+
+        andArray.forEach(item => {
+          console.log("item: " + item.toString())
+        })
+      })
+
+      if (queryArray.length === 0) {
 
         self.setState({ 
-          chosenImages: [] // remove the images if there are no chosen props
+          chosenImages: [] // remove the images if there are no chosen query terms
         })
         return
       }
@@ -114,7 +124,7 @@ export default class HomeScreen extends React.Component {
       let endDate = searchByTime ? self.state.multiSliderValue[1].toString() : DEFAULT_END_DATE.toString() 
       endDate += '-12-31T23:59:59'
 
-      API.onChoosingPropsGetUrls(propsArray, queryType, startDate, endDate).then( resultsSet => {
+      API.onChoosingPropsGetUrls(queryArray, startDate, endDate).then( resultsSet => {
 
         const arr = Array.from(resultsSet) // TODO: needs a check to see if it's a Set !
         // console.log("array length: " + arr.length)
@@ -128,18 +138,30 @@ export default class HomeScreen extends React.Component {
 
   // given to ScrollableFlatList as its onCategoryItemPress callback
   _onFlatListItemPress = (item) => {
-    let containsFilter = false
-    this.state.selectedFiltersArray.forEach((filter) => {
-      if(filter == item) {
-        containsFilter = true
+
+    // changed things so that andArrays (formerly selectedFiltersArray) is an array of arrays;
+    // the subarrays' contents represent AND-type queries, while the
+    // subarrays themselves represent OR-type queries. a query's negativity
+    // is a boolean on the actual stored Query object (within each subarray)
+    let oneItemSubArrayContainsItem = false
+    this.state.andArrays.forEach(andArray => {
+
+      if (andArray.length === 1) {
+
+        if(andArray[0].term === item) {
+          oneItemSubArrayContainsItem = true
+        }
       }
     })
-    if(!containsFilter) {
+    // you can't add more than one 'orphan' search terms; e.g. 'dog' OR 'dog' OR 'dog'.
+    // combining terms with other terms twice or more is fine though;
+    // e.g. 'dog AND alive' OR 'dog AND red'
+    if(!oneItemSubArrayContainsItem) {
       this.setState(prevState => ({
-        selectedFiltersArray: [...prevState.selectedFiltersArray, item]
+        andArrays: [...prevState.andArrays, [new QueryData(item, false)]] // queries are positive by default
       }))
-      this._fetchImagesBasedOnProps(API.QUERY_TYPE.AND)
-    } // if
+      this._fetchImagesBasedOnProps()
+    }
 
     // console.log("selected "+item)
     this.setState({clickedCategoryItem: item})
@@ -166,25 +188,55 @@ export default class HomeScreen extends React.Component {
     this.setState({showSubCategory: true, iconArrow: 'chevron-up'})
   } // _onFlatListItemPress
 
-  _deleteSelectedFilter = (filter) => {
-    this.state.selectedFiltersArray.forEach((item, index) => {
-        if(item == filter) {
-          // create new array without the filter that user is deleting and set it as the new state
-          this.setState(prevState => ({ selectedFiltersArray: prevState.selectedFiltersArray.filter(item => item != filter) }))
-          this._fetchImagesBasedOnProps(API.QUERY_TYPE.AND) // update the visible images based on the change
-        }
-    })
-  } // _deleteSelectedFilter
+  // passed all the way down to individual SearchItem components... non-ideal, 
+  // but to force a re-render with each altering of HomeScreen state, it must be done
+  _onDeleteSearchItem = (term, indexOfSubArray) => {
+
+    console.log("term + index: " + term + ", " + indexOfSubArray)
+    const updatedSubArray = this.state.andArrays[indexOfSubArray].filter(queryItem => queryItem.term != term)
+    // console.log("updatedSubArray length: " + updatedSubArray.length)
+
+    if (updatedSubArray.length > 0) {
+      
+      let tempAndArraysState = this.state.andArrays.slice() // copy the state... inefficient but whatever
+      tempAndArraysState[indexOfSubArray] = updatedSubArray
+      this.setState({ andArrays: tempAndArraysState })
+    } else {
+
+      let tempAndArraysState2 = this.state.andArrays.slice()
+
+      /*
+      tempAndArraysState2.forEach(subArray => {
+
+        subArray.forEach(item => {
+          console.log("tempArrayState2 item: " + item.toString())
+        })
+      }) */
+
+      tempAndArraysState2.splice(indexOfSubArray, 1)  // remove the subArray
+
+      /*
+      tempAndArraysState2.forEach(subArray => {
+
+        subArray.forEach(item => {
+          console.log("altered tempArrayState2 item: " + item.toString())
+        })
+      }) */
+
+      this.setState({ andArrays: tempAndArraysState2 })
+    }
+    this._fetchImagesBasedOnProps()
+  } // _onDeleteSearchItem
 
   _multiSliderValuesChange = values => {
     this.setState({
       multiSliderValue: values,
     })
-    this._fetchImagesBasedOnProps(API.QUERY_TYPE.AND)
+    this._fetchImagesBasedOnProps()
   }
 
   _closeOrOpenSubCategoryFlatList(){
-    console.log("size "+this.state.subCategoryOptions.length+" s "+this.state.showSubCategory)
+    // console.log("size "+this.state.subCategoryOptions.length+" s "+this.state.showSubCategory)
     if (this.state.subCategoryOptions.length>0) {
       var arrowDirection = (this.state.showSubCategory ? "chevron-down" : "chevron-up")
       this.setState(prevState => ({ 
@@ -195,6 +247,8 @@ export default class HomeScreen extends React.Component {
   } // _closeOrOpenSubCategoryFlatList
 
   render() {
+
+    console.log("triggered HomeScreen render!")
 
     const { navigate } = this.props.navigation
     const config = {
@@ -212,10 +266,12 @@ export default class HomeScreen extends React.Component {
           onSwipeUp={() => this._closeOrOpenSubCategoryFlatList()}
           config={config}
         >    
-          {(this.state.selectedFiltersArray.length > 0) && 
+          {(this.state.andArrays.length > 0) && 
             <SelectedFiltersFlatList
-                  data = {this.state.selectedFiltersArray}
-                  onDelete = {this._deleteSelectedFilter}
+                  data = {this.state.andArrays}
+                  onDelete = {this._onDeleteSearchItem}
+                  /* reloadImages={this._fetchImagesBasedOnProps} // needed to update images when deleting search items */
+                  /* onDelete = {this._deleteSelectedFilter} */
             />
           }
           <ScrollableFlatList
@@ -233,7 +289,7 @@ export default class HomeScreen extends React.Component {
             <View style={styles.timeBox}>
               <Checkbox
                 status={this.state.showSlider ? 'checked' : 'unchecked'}
-                onPress={() => { this.setState(prevState => ({ showSlider: !prevState.showSlider })); this._fetchImagesBasedOnProps(API.QUERY_TYPE.AND) }}
+                onPress={() => { this.setState(prevState => ({ showSlider: !prevState.showSlider })); this._fetchImagesBasedOnProps() }}
               />
               <Text style={{alignSelf:'center'}}>Search by time</Text>
             </View>

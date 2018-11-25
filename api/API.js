@@ -38,7 +38,7 @@ const GET_ALL_TOP_LVL_PROPS = `SELECT DISTINCT ?prop WHERE { ${IMAGE_DEPIC_COND}
 // const GET_ALL_LARGE_THUMBNAIL_URLS = `SELECT ?url WHERE { ?img a ${IMAGE} . ?img ${LARGE_THUMBNAIL_URL} ?url }`
 
 // I made it into an object because of the way that the queries work...
-// we'll have to see if it causes any unpleasant side effects.
+// there seems to be no ill effects from it.
 export default API = {
 
   QUERY_TYPE: {
@@ -110,67 +110,53 @@ export default API = {
     return this.query(config, false)
   }, // getTopLevelImageProps
 
-  // first param is an array of search terms.
-  // queryType comes from enum in this file.
-  // startDate and endDate need to be properties in HomeScreen's state (set by moving the slider); 
-  // default values can be something like 01.01.2000 and the current date/timestamp 
-  // (formatted correctly like this: '2017-04-28T05:13:22').
-  onChoosingPropsGetUrls: function(chosenProps, queryType, startDate, endDate) {
+  // queryArray is an array of arrays of AND-type searches (which contain QueryData objects).
+  // startDate and endDate are properties in HomeScreen's state (set by moving the slider)
+  onChoosingPropsGetUrls: function(queryArray, startDate, endDate) {
 
-    const numOfTerms = chosenProps.length
+    /* // example of a queryArray; not meant to be used anywhere!
+    const orTypeQueries = [
+
+      [ QueryData(term='dog'), QueryData(term='alive'), QueryData(term='yellow') ], 
+      [ QueryData(term='cat') ], 
+      [ QueryData(term='goose'), QueryData(term='white') ]
+    ]
+    */
+
     let queryString = ''
 
-    // there's some duplicate code, but it's better for readability to contain each query within its own block
-    if (numOfTerms === 1) {
+    const orTypeQueries = queryArray
+    const numOfOrTypeQueries = orTypeQueries.length
 
-      // '%26%26' == '&&' in this bizarro world
-      queryString = `SELECT DISTINCT ?url WHERE { ?depic ${MOD_DATE} ?date 
-      . ?depic ${DOC_SPECIFIER} '${chosenProps[0]}' 
-      . ?depic ${DEPICTED_OBJ_INV} ?url FILTER ( ?date >= '${startDate}'^^${DATE_FORMAT} %26%26 ?date <= '${endDate}'^^${DATE_FORMAT} ) } ${ORDER_BY_DATE_DESC}`
+    if (numOfOrTypeQueries === 1) {
+
+      queryString = `SELECT DISTINCT ?url WHERE { ?depic ${MOD_DATE} ?date . `
     } else {
+      queryString = `SELECT DISTINCT ?url WHERE { { ?depic ${MOD_DATE} ?date . `
+    }
 
-      switch(queryType) {
+    orTypeQueries.forEach( (andTypeInnerArray, arrIndex) => {
 
-        case this.QUERY_TYPE.OR:
+      if (arrIndex !== 0 && arrIndex < numOfOrTypeQueries) {
+        queryString += ` } ${this.QUERY_TYPE.OR} { `
+      }
 
-          queryString = `SELECT DISTINCT ?url WHERE { ?depic ${MOD_DATE} ?date . `
+      andTypeInnerArray.forEach( (queryData, index) => {
 
-          chosenProps.forEach( (term, index) => {
+        queryString += `?depic ${DOC_SPECIFIER} '${queryData.term}' 
+        . ?depic ${DEPICTED_OBJ_INV} ?url`
+        if (index !== andTypeInnerArray.length-1) {
+          queryString += ` ${this.QUERY_TYPE.AND} `
+        }
+      }) // forEach
+      if (numOfOrTypeQueries > 1 && arrIndex !== 0) { queryString += ' }' }
+    }) // forEach
+    queryString += ` FILTER ( ?date >= '${startDate}'^^${DATE_FORMAT} %26%26 ?date <= '${endDate}'^^${DATE_FORMAT} ) } ${ORDER_BY_DATE_DESC}`
+    // } // else
 
-            queryString += `{ ?depic ${DOC_SPECIFIER} '${term}' 
-            . ?depic ${DEPICTED_OBJ_INV} ?url }`
-            if (index !== numOfTerms-1) {
-              queryString += ` ${this.QUERY_TYPE.OR} `
-            }
-          }) // forEach
-          queryString += ` FILTER ( ?date >= '${startDate}'^^${DATE_FORMAT} %26%26 ?date <= '${endDate}'^^${DATE_FORMAT} ) } ${ORDER_BY_DATE_DESC}`
-          break
+    // TODO: deal with negative queries ............................ -.-
 
-        case this.QUERY_TYPE.AND:
-
-          queryString = `SELECT DISTINCT ?url WHERE { ?depic ${MOD_DATE} ?date . `
-
-          chosenProps.forEach( (term, index) => {
-
-            queryString += `?depic ${DOC_SPECIFIER} '${term}' 
-            . ?depic ${DEPICTED_OBJ_INV} ?url`
-            if (index !== numOfTerms-1) {
-              queryString += ` ${this.QUERY_TYPE.AND} `
-            }
-          }) // forEach
-          queryString += ` FILTER ( ?date >= '${startDate}'^^${DATE_FORMAT} %26%26 ?date <= '${endDate}'^^${DATE_FORMAT} ) } ${ORDER_BY_DATE_DESC}`
-          break
-
-        case this.QUERY_TYPE.NEG:
-
-          break
-
-        default:
-          break
-      } // switch
-    } // else
-
-    // console.log("query: " + queryString)
+    console.log("query: " + queryString)
     const config = {
       query: queryString
     }
