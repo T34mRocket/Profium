@@ -7,8 +7,9 @@ export default class SearchItem extends React.Component {
   constructor(props) {
     super(props)
 
+    // console.log("term in search item props: " + props.queryData.term)
+
     this.state = {
-      term: props.queryData.term,
       isNegative: props.queryData.isNegative
     }
   }
@@ -23,7 +24,7 @@ export default class SearchItem extends React.Component {
   // uses stuffs that are passed here all the way from HomeScreen... beautiful f'in mess, React -.-
   _onDeleteItem = () => {
 
-    this.props.onDeleteItem(this.state.term, this.props.containerArrayIndex)
+    this.props.onDeleteItem(this.props.queryData.term, this.props.containerArrayIndex)
   }
 
   render() {
@@ -32,7 +33,7 @@ export default class SearchItem extends React.Component {
 
     return (
       <Chip onPress={() => {this._onPressSearchItem()}} onClose={() => {this._onDeleteItem()}} style={styles.chip}>
-        {this.state.term}
+        {this.props.queryData.term}
       </Chip>
     )
   } // render

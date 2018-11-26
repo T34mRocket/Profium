@@ -101,13 +101,13 @@ export default class HomeScreen extends React.Component {
       
       const queryArray = self.state.andArrays
 
-      console.log("subArray items: ")
-      queryArray.forEach(andArray => {
+      // console.log("subArray items: ")
+      /* queryArray.forEach(andArray => {
 
         andArray.forEach(item => {
           console.log("item: " + item.toString())
         })
-      })
+      }) */
 
       if (queryArray.length === 0) {
 
@@ -153,16 +153,16 @@ export default class HomeScreen extends React.Component {
         }
       }
     })
-    // you can't add more than one 'orphan' search terms; e.g. 'dog' OR 'dog' OR 'dog'.
+    // you can't add more than one 'orphan' search term; e.g. 'dog' OR 'dog' OR 'dog'.
     // combining terms with other terms twice or more is fine though;
     // e.g. 'dog AND alive' OR 'dog AND red'
-    if(!oneItemSubArrayContainsItem) {
-      this.setState(prevState => ({
-        andArrays: [...prevState.andArrays, [new QueryData(item, false)]] // queries are positive by default
-      }))
-      this._fetchImagesBasedOnProps()
-    }
+    if(oneItemSubArrayContainsItem) return
 
+    this.setState(prevState => ({
+      andArrays: [...prevState.andArrays, [new QueryData(item, false)]] // queries are positive by default
+    }))
+    this._fetchImagesBasedOnProps()
+    
     // console.log("selected "+item)
     this.setState({clickedCategoryItem: item})
 
@@ -192,7 +192,7 @@ export default class HomeScreen extends React.Component {
   // but to force a re-render with each altering of HomeScreen state, it must be done
   _onDeleteSearchItem = (term, indexOfSubArray) => {
 
-    console.log("term + index: " + term + ", " + indexOfSubArray)
+    // console.log("deleteFunc term + index: " + term + ", " + indexOfSubArray)
     const updatedSubArray = this.state.andArrays[indexOfSubArray].filter(queryItem => queryItem.term != term)
     // console.log("updatedSubArray length: " + updatedSubArray.length)
 
@@ -219,7 +219,7 @@ export default class HomeScreen extends React.Component {
       tempAndArraysState2.forEach(subArray => {
 
         subArray.forEach(item => {
-          console.log("altered tempArrayState2 item: " + item.toString())
+          console.log("altered tempArrayState2 item after delete: " + item.toString())
         })
       }) */
 
@@ -248,7 +248,7 @@ export default class HomeScreen extends React.Component {
 
   render() {
 
-    console.log("triggered HomeScreen render!")
+    // console.log("triggered HomeScreen render!")
 
     const { navigate } = this.props.navigation
     const config = {
@@ -257,7 +257,13 @@ export default class HomeScreen extends React.Component {
     };
 
     // console.log(this.state.topLevelProps)
-    // console.log("props array in render: " + this.state.selectedFiltersArray)
+    // console.log("props array in render:")
+    /* this.state.andArrays.forEach(array => {
+      array.forEach(item => {
+
+        console.log(item.toString())
+      })
+    }) */
 
     return (
       <SafeAreaView style={ styles.container }>
@@ -270,8 +276,6 @@ export default class HomeScreen extends React.Component {
             <SelectedFiltersFlatList
                   data = {this.state.andArrays}
                   onDelete = {this._onDeleteSearchItem}
-                  /* reloadImages={this._fetchImagesBasedOnProps} // needed to update images when deleting search items */
-                  /* onDelete = {this._deleteSelectedFilter} */
             />
           }
           <ScrollableFlatList
