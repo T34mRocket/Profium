@@ -4,7 +4,7 @@ import { Chip } from 'react-native-paper'
 import HierarchySeparatorLine from './HierarchySeparatorLine'
 import AndContainer from './AndContainer'
 
-const SelectedFiltersFlatList = ({ data, onDelete /* reloadImages */ }) => {
+const SelectedFiltersFlatList = ({ data, onDelete, toggleNegativity }) => {
 
   // console.log("type of onDelete in SelectedFiltersFlatList: " + typeof onDelete)
   return (
@@ -23,7 +23,7 @@ const SelectedFiltersFlatList = ({ data, onDelete /* reloadImages */ }) => {
           }) */
 
           return (
-            <AndContainer searchItems={andArray} onDelete={onDelete} indexInMainArray={index}/>
+            <AndContainer searchItems={andArray} onDelete={onDelete} indexInMainArray={index} toggleNegativity={toggleNegativity} />
           )
         }}
         keyExtractor = {(item, index) => index.toString()}

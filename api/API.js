@@ -41,11 +41,11 @@ const GET_ALL_TOP_LVL_PROPS = `SELECT DISTINCT ?prop WHERE { ${IMAGE_DEPIC_COND}
 // there seems to be no ill effects from it.
 export default API = {
 
+  // in practice, this doesn't really need to exist... remove maybe
   QUERY_TYPE: {
 
     AND: '.',
-    OR: 'UNION',
-    NEG: 'NOT EXISTS'
+    OR: 'UNION'
   },
 
   query: function(config, useUri) {
@@ -68,34 +68,36 @@ export default API = {
     .then(responseText => { 
 
       const xml = responseText
-      // console.log("xml: " + xml) // useful for debugging; do not delete !!
+      // console.log("xml: " + xml)
       let resultsSet = new Set()
       parseXml(xml, function (err, result) {
-        
-        // console.log("JSON: " + JSON.stringify(result))
 
-        const results = result.sparql.results[0].result
-        // console.log("truncated JSON: " + JSON.stringify(results))
-        
-        if (results !== undefined && results !== null) { 
+        try {
+          // console.log("JSON: " + JSON.stringify(result))
+          const results = result.sparql.results[0].result
+          // console.log("truncated JSON: " + JSON.stringify(results))
+          
+          if (results !== undefined && results !== null) { 
 
-          // console.log("got results")
-          results.forEach(item => {
-            
-            // turn it into a switch if more return formats emerge... NOTE: always check what is actually returned from the server, 
-            // before trying to work with the returned result!
-            if (useUri === true) {
+            // console.log("got results")
+            results.forEach(item => {
               
-              // console.log("in useUri block")
-              resultsSet.add(item.binding[0].uri[0])
-            } else {     
-              // console.log("in literal block")
-              resultsSet.add(item.binding[0].literal[0]._)
-            }
-          }) // forEach
-        } // if
+              // turn it into a switch if more return formats emerge... NOTE: always check what is actually returned from the server, 
+              // before trying to work with the returned result!
+              if (useUri === true) {
+                
+                // console.log("in useUri block")
+                resultsSet.add(item.binding[0].uri[0])
+              } else {     
+                // console.log("in literal block")
+                resultsSet.add(item.binding[0].literal[0]._)
+              }
+            }) // forEach
+          } // if
+        } catch(error) {
+          console.log("error processing query: " + error) // not ideal, but the app doesn't crash with each failed query now
+        }
       }) // parseXml
-      // console.log("query resultsSet: " + resultsSet)
       return resultsSet
     })
     .catch(error => console.error(error))
@@ -143,18 +145,26 @@ export default API = {
 
       andTypeInnerArray.forEach( (queryData, index) => {
 
-        queryString += `?depic ${DOC_SPECIFIER} '${queryData.term}' 
-        . ?depic ${DEPICTED_OBJ_INV} ?url`
+        if (queryData.isNegative) {
+          
+          // NOTE: I'm only 80 % sure that this works correctly atm
+          queryString += `?depic ${DOC_SPECIFIER} ?spec . ?depic ${DEPICTED_OBJ_INV} ?url . 
+          FILTER (?spec != '${queryData.term}')`
+        } else {
+
+          queryString += `?depic ${DOC_SPECIFIER} '${queryData.term}' 
+          . ?depic ${DEPICTED_OBJ_INV} ?url`
+        }
         if (index !== andTypeInnerArray.length-1) {
           queryString += ` ${this.QUERY_TYPE.AND} `
         }
       }) // forEach
-      if (numOfOrTypeQueries > 1 && arrIndex !== 0) { queryString += ' }' }
+      if (numOfOrTypeQueries > 1 && arrIndex !== 0) { 
+        
+        queryString += ' }' 
+      }
     }) // forEach
     queryString += ` FILTER ( ?date >= '${startDate}'^^${DATE_FORMAT} %26%26 ?date <= '${endDate}'^^${DATE_FORMAT} ) } ${ORDER_BY_DATE_DESC}`
-    // } // else
-
-    // TODO: deal with negative queries ............................ -.-
 
     console.log("query: " + queryString)
     const config = {
@@ -168,7 +178,7 @@ export default API = {
     return `${DISPLAY_URL_START}${imageUrl}${IMG_TYPE_LARGE_THUMB}`
   },
 
-  fulllImageDisplayUrl: function(imageUrl) {
+  fullImageDisplayUrl: function(imageUrl) {
 
     return `${DISPLAY_URL_START}${imageUrl}${IMG_TYPE_NORMAL}`
   }

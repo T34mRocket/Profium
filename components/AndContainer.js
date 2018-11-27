@@ -38,7 +38,12 @@ export default class AndContainer extends React.Component {
     // console.log("searchItems array in AndContainer render: " + this.state.searchItems)
     const termList = this.props.searchItems.map( (queryData) => 
       // console.log("queryData term in AndContainer: " + queryData.term); NOTE: enabling it wreaks havoc without extra parentheses !!
-      <SearchItem queryData={queryData} onDeleteItem={this.props.onDelete} containerArrayIndex={this.props.indexInMainArray} key={queryData.term} />
+      <SearchItem 
+        queryData={queryData} 
+        onDeleteItem={this.props.onDelete} 
+        containerArrayIndex={this.props.indexInMainArray} 
+        toggleNegativity={this.props.toggleNegativity}
+        key={queryData.term} />
     )
     /* termList.forEach(item =>
       console.log("searchItem: " + item)
