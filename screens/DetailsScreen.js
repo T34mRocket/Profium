@@ -1,6 +1,7 @@
 import React from 'react'
-import { ScrollView, StyleSheet, View } from 'react-native'
-import { Card, CardTitle, CardContent, CardAction, CardButton, CardImage } from 'react-native-cards'
+import { ScrollView, StyleSheet, View, Image } from 'react-native'
+import { CardTitle, CardContent, CardAction, CardButton, CardImage } from 'react-native-cards'
+import { Button, Card, Title, Paragraph } from 'react-native-paper';
 
 export default class DetailsScreen extends React.Component {
   static navigationOptions = {
@@ -9,22 +10,45 @@ export default class DetailsScreen extends React.Component {
 
   constructor(props) {
     super(props)
+    this.state={
+      width: null,
+      height: null
+    }
+  }
+
+  componentWillMount() {
+      // resize image based on the passed parameters (width or height)
+      Image.getSize(this.props.navigation.state.params.imageurl, (width, height) => {
+          if (this.props.navigation.state.params.width && !this.props.navigation.state.params.height) {
+              this.setState({
+                  width: this.props.navigation.state.params.width,
+                  height: height * (this.props.navigation.state.params.width / width)
+              });
+          } else if (!this.props.navigation.state.params.width && this.props.navigation.state.params.height) {
+              this.setState({
+                  width: width * (this.props.navigation.state.params.height / height),
+                  height: this.props.navigation.state.params.height
+              });
+          } else {
+              this.setState({ width: width, height: height });
+          }
+      });
   }
 
   render() {
       return (
       <ScrollView style={styles.container}>
-        <Card >
-          <CardTitle
-                subtitle={this.props.navigation.state.params.name}
-                style={{ maxHeight: 50 }}
-          />
-          <CardImage
-            style={styles.image} 
-            source={{uri: this.props.navigation.state.params.imageurl}}
-            resizeMode = {'contain'}
-          />
-          <View style={styles.row}>
+        <Card style={styles.card}>
+          <Card.Cover style={{height:this.state.height}} source={{uri: this.props.navigation.state.params.imageurl}} />
+          <Card.Actions>
+            <Button>Cancel</Button>
+            <Button>Ok</Button>
+          </Card.Actions>
+          
+          <Card.Content>
+            <Title>Card title</Title>
+            <Paragraph>Card content</Paragraph>
+            <View style={styles.row}>
             <View style={styles.box1}>
               <CardTitle
                 subtitle="Data"
@@ -40,12 +64,9 @@ export default class DetailsScreen extends React.Component {
               <CardContent text={`something`} />
               <CardContent text={`something`} />
               <CardContent text={`something`} />
-              <CardAction 
-                separator={true}
-                inColumn={true}>
-              </CardAction>
             </View>
           </View>
+          </Card.Content>
         </Card>
       </ScrollView>
     )
@@ -53,6 +74,9 @@ export default class DetailsScreen extends React.Component {
 }
 
 const styles = StyleSheet.create({
+  card: {
+    margin:5
+  },
   container: {
     flex: 1,
   },
@@ -85,6 +109,7 @@ const styles = StyleSheet.create({
     padding: 5
   },
   image:{
-    backgroundColor: '#fff'
+    backgroundColor: '#fff',
+    marginTop: 5
   }
 })

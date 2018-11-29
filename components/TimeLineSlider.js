@@ -46,7 +46,8 @@ const styles = StyleSheet.create({
     sliderContainer: {
         flexDirection: 'column',
         height:100,
-        maxHeight:100
+        maxHeight:100,
+        borderRadius: 10
     },  
     multiSlider: {
         flex:2,

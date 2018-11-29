@@ -47,7 +47,7 @@ export default class SearchItem extends React.Component {
           <Text style={{ 
             color: 'black',
             paddingLeft:5,
-            paddingRight:5
+            paddingRight:5,
           }}>{this.props.queryData.term}</Text>
           <Icon name='close' type='AntDesign' style={{ paddingLeft:15, paddingRight:15, margin:5 }} onPress={() => {this._onDeleteItem()}}></Icon>
       </TouchableOpacity>

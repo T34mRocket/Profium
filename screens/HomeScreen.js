@@ -13,7 +13,8 @@ import {
   FlatList,
   Button,
   StatusBar,
-  SafeAreaView
+  SafeAreaView,
+  Dimensions
 } from 'react-native'
 import { WebBrowser } from 'expo'
 import GestureRecognizer, {swipeDirections} from 'react-native-swipe-gestures';
@@ -71,7 +72,8 @@ export default class HomeScreen extends React.Component {
       // and almost impossible to test for proper functionality
       multiSliderValue: [DEFAULT_START_DATE, DEFAULT_END_DATE],
       showSlider: false,
-      iconArrow: null
+      iconArrow: null,
+      screenWidth: Dimensions.get('window').width
     }
   } // constructor
 
@@ -336,21 +338,21 @@ export default class HomeScreen extends React.Component {
           <TimeLineSlider selectedStartYear={this.state.multiSliderValue[0]} selectedEndYear={this.state.multiSliderValue[1]} multiSliderValuesChange={this._multiSliderValuesChange} />
         }
         <FlatList 
-          style = {{marginTop:5}}
+          style = {{ marginRight: 2.5, marginLeft: 2.5}}
           vertical            
           removeClippedSubviews
           disableVirtualization
           data = {this.state.chosenImages || []}
-          numColumns = { 2 }
+          numColumns = { 3 }
           renderItem = {({ item: rowData }) => {
 
             const smallImageUrl = API.smallImageDisplayUrl(rowData)
             const fullImageUrl = API.fullImageDisplayUrl(rowData) // shown when opening the image details
             // console.log("rowData: " + rowData)
             return (
-                <TouchableWithoutFeedback onPress={() => navigate('Details', { name: "", imageurl: fullImageUrl })}>
+                <TouchableWithoutFeedback onPress={() => navigate('Details', { width:this.state.screenWidth, imageurl: fullImageUrl })}>
                   <View style={styles.box2} >
-                    <ImageCardListItem name="" imageUrl={smallImageUrl}/>
+                    <ImageCardListItem imageUrl={fullImageUrl}/>
                   </View>
                 </TouchableWithoutFeedback>
             )
@@ -381,7 +383,7 @@ const styles = StyleSheet.create({
     flex: 1
   },
   box2: {
-    flex: 2
+    flex: 1,
   },
   button: {
     shadowColor: 'rgba(0,0,0, .4)', // IOS
