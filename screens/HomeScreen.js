@@ -136,6 +136,22 @@ export default class HomeScreen extends React.Component {
     }, 10) // setTimeout
   } // _fetchImagesBasedOnProps
 
+  // passed all the way down to individual SearchItem components
+  _toggleNegativity = (term, subArrayIndex) => {
+    // NOTE: there might be a less convoluted way to do this, but rn I can't think of it
+  
+    let subArray = this.state.andArrays[subArrayIndex].slice()
+    subArray.map(queryData => {
+        if (queryData.term === term) {
+        queryData.isNegative = !queryData.isNegative
+      }
+    }) // map
+      let tempAndArraysState = this.state.andArrays.slice() // copy the state... inefficient but whatever
+    tempAndArraysState[subArrayIndex] = subArray
+    this.setState({ andArrays: tempAndArraysState })
+      this._fetchImagesBasedOnProps()
+  } // _toggleNegativity
+
   // given to ScrollableFlatList as its onCategoryItemPress callback
   _onFlatListItemPress = (item) => {
 
@@ -205,28 +221,28 @@ export default class HomeScreen extends React.Component {
 
       let tempAndArraysState2 = this.state.andArrays.slice()
 
-      /*
-      tempAndArraysState2.forEach(subArray => {
-
-        subArray.forEach(item => {
-          console.log("tempArrayState2 item: " + item.toString())
-        })
-      }) */
-
       tempAndArraysState2.splice(indexOfSubArray, 1)  // remove the subArray
-
-      /*
-      tempAndArraysState2.forEach(subArray => {
-
-        subArray.forEach(item => {
-          console.log("altered tempArrayState2 item after delete: " + item.toString())
-        })
-      }) */
 
       this.setState({ andArrays: tempAndArraysState2 })
     }
     this._fetchImagesBasedOnProps()
   } // _onDeleteSearchItem
+
+  _onFilterDrag = (item) => {
+      console.log(item)
+      /*let containsItem = false
+      this.state.andArrays.forEach((containedItem) => {
+        if(item.term == containedItem.term) {
+          containsItem = true
+        }
+      })
+
+      if (containsItem) return
+
+      this.setState(prevState => ({
+        andArrays: [...prevState.andArrays, item]
+      }))*/
+  }
 
   _multiSliderValuesChange = values => {
     this.setState({
@@ -276,6 +292,8 @@ export default class HomeScreen extends React.Component {
             <SelectedFiltersFlatList
                   data = {this.state.andArrays}
                   onDelete = {this._onDeleteSearchItem}
+                  toggleNegativity = {this._toggleNegativity}
+                  onFilterDrag = {this._onFilterDrag}
             />
           }
           <ScrollableFlatList
@@ -327,7 +345,7 @@ export default class HomeScreen extends React.Component {
           renderItem = {({ item: rowData }) => {
 
             const smallImageUrl = API.smallImageDisplayUrl(rowData)
-            const fullImageUrl = API.fulllImageDisplayUrl(rowData) // shown when opening the image details
+            const fullImageUrl = API.fullImageDisplayUrl(rowData) // shown when opening the image details
             // console.log("rowData: " + rowData)
             return (
                 <TouchableWithoutFeedback onPress={() => navigate('Details', { name: "", imageurl: fullImageUrl })}>
