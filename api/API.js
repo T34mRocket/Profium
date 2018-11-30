@@ -60,7 +60,7 @@ export default API = {
       },
       body: `${QUERY_START}${config.query}`
     }
-    // console.log("body: " + options.body)
+    console.log("body: " + options.body)
 
     // using await + async would be better, but it's easier to do this since it's familiar
     return fetch(request, options)
@@ -68,12 +68,12 @@ export default API = {
     .then(responseText => { 
 
       const xml = responseText
-      // console.log("xml: " + xml)
+      console.log("xml: " + xml)
       let resultsSet = new Set()
       parseXml(xml, function (err, result) {
 
         try {
-          // console.log("JSON: " + JSON.stringify(result))
+          console.log("JSON: " + JSON.stringify(result))
           const results = result.sparql.results[0].result
           // console.log("truncated JSON: " + JSON.stringify(results))
           
