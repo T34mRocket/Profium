@@ -41,9 +41,13 @@ export default class AndContainer extends React.Component {
       <SearchItem 
         queryData={queryData} 
         onDeleteItem={this.props.onDelete} 
-        containerArrayIndex={this.props.indexInMainArray} 
-        toggleNegativity={this.props.toggleNegativity}
-        key={queryData.term} />
+        containerArrayIndex={this.props.indexInMainArray}
+        toggleNegativity={this.props.toggleNegativity} 
+        key={queryData.term} 
+        move={this.props.move} 
+        moveEnd={this.props.moveEnd} 
+        isActive={this.props.isActive}
+        />
     )
     /* termList.forEach(item =>
       console.log("searchItem: " + item)

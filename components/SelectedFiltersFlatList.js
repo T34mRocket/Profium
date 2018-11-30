@@ -1,19 +1,59 @@
 import React from 'react'
-import { FlatList, StyleSheet, View } from 'react-native'
+import { FlatList, StyleSheet, View, TouchableOpacity, Text } from 'react-native'
+import { Icon } from 'react-native-elements'
 import { Chip } from 'react-native-paper'
 import HierarchySeparatorLine from './HierarchySeparatorLine'
 import AndContainer from './AndContainer'
+import SortableFlatList from './SortableFlatList'
 
-const SelectedFiltersFlatList = ({ data, onDelete, toggleNegativity }) => {
+const SelectedFiltersFlatList = ({ data, onDelete, toggleNegativity, onFilterDrag }) => {
+
+  renderItem = ({ item, index, move, moveEnd, isActive }) => {
+    return (
+      /*<TouchableOpacity
+        style={{ 
+          height: 40, 
+          backgroundColor: isActive ? 'rgba(52, 52, 52, 0.8)' : 'white',
+          alignItems: 'center', 
+          justifyContent: 'center',
+          flexDirection: "row",
+        }}
+        onLongPress={move}
+        onPressOut={moveEnd}
+      >
+          <Text style={{ 
+            color: 'black',
+            paddingLeft:5,
+            paddingRight:5
+          }}>{item}</Text>
+          <Icon name='close' type='AntDesign' style={{ paddingLeft:15, paddingRight:15, margin:5 }} onPress={() => {onDelete(item)}}></Icon>
+      </TouchableOpacity>*/
+      <AndContainer searchItems={item} onDelete={onDelete} indexInMainArray={index} toggleNegativity={toggleNegativity} move={move} moveEnd={moveEnd} isActive={isActive} />
+      
+    )
+  }
+
 
   // console.log("type of onDelete in SelectedFiltersFlatList: " + typeof onDelete)
   return (
-    <View>
-        <FlatList 
+    <View style={{ height: 50, maxHeight: 50 }}>
+        <SortableFlatList
+          data={data}
+          horizontal
+          showsHorizontalScrollIndicator = {false}
+          renderItem={this.renderItem}
+          keyExtractor={(item, index) => `draggable-item-${item}`}
+          scrollPercent={5}
+          onMoveEnd={({ data }) => {onFilterDrag(data)}}
+        />
+        {/*<SortableFlatList 
         style = {{ height: 40, maxHeight: 40}}
         horizontal            
         showsHorizontalScrollIndicator = {false}
         data = {data}
+        keyExtractor={(item, index) => `draggable-item-${item}`}
+        scrollPercent={5}
+        renderItem={this.renderItem}
         renderItem={({ item: andArray, index }) => {
 
           /*
@@ -22,12 +62,12 @@ const SelectedFiltersFlatList = ({ data, onDelete, toggleNegativity }) => {
             console.log("andArray item: " + item.term)
           }) */
 
-          return (
+          /*return (
             <AndContainer searchItems={andArray} onDelete={onDelete} indexInMainArray={index} toggleNegativity={toggleNegativity} />
           )
         }}
-        keyExtractor = {(item, index) => index.toString()}
-        />
+        onMoveEnd={({ data }) => {onFilterDrag(data)}}
+        />*/}
         <HierarchySeparatorLine/>
     </View>
   )

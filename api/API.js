@@ -68,12 +68,12 @@ export default API = {
     .then(responseText => { 
 
       const xml = responseText
-      console.log("xml: " + xml)
+      // console.log("xml: " + xml)
       let resultsSet = new Set()
       parseXml(xml, function (err, result) {
 
         try {
-          console.log("JSON: " + JSON.stringify(result))
+          // console.log("JSON: " + JSON.stringify(result))
           const results = result.sparql.results[0].result
           // console.log("truncated JSON: " + JSON.stringify(results))
           
@@ -118,7 +118,6 @@ export default API = {
 
     /* // example of a queryArray; not meant to be used anywhere!
     const orTypeQueries = [
-
       [ QueryData(term='dog'), QueryData(term='alive'), QueryData(term='yellow') ], 
       [ QueryData(term='cat') ], 
       [ QueryData(term='goose'), QueryData(term='white') ]

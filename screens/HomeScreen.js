@@ -13,7 +13,8 @@ import {
   FlatList,
   Button,
   StatusBar,
-  SafeAreaView
+  SafeAreaView,
+  Dimensions
 } from 'react-native'
 import { WebBrowser } from 'expo'
 import GestureRecognizer, {swipeDirections} from 'react-native-swipe-gestures';
@@ -71,7 +72,8 @@ export default class HomeScreen extends React.Component {
       // and almost impossible to test for proper functionality
       multiSliderValue: [DEFAULT_START_DATE, DEFAULT_END_DATE],
       showSlider: false,
-      iconArrow: null
+      iconArrow: null,
+      screenWidth: Dimensions.get('window').width
     }
   } // constructor
 
@@ -138,22 +140,18 @@ export default class HomeScreen extends React.Component {
 
   // passed all the way down to individual SearchItem components
   _toggleNegativity = (term, subArrayIndex) => {
-
-  // NOTE: there might be a less convoluted way to do this, but rn I can't think of it
+    // NOTE: there might be a less convoluted way to do this, but rn I can't think of it
   
     let subArray = this.state.andArrays[subArrayIndex].slice()
     subArray.map(queryData => {
-
-      if (queryData.term === term) {
+        if (queryData.term === term) {
         queryData.isNegative = !queryData.isNegative
       }
     }) // map
-
-    let tempAndArraysState = this.state.andArrays.slice() // copy the state... inefficient but whatever
+      let tempAndArraysState = this.state.andArrays.slice() // copy the state... inefficient but whatever
     tempAndArraysState[subArrayIndex] = subArray
     this.setState({ andArrays: tempAndArraysState })
-
-    this._fetchImagesBasedOnProps()
+      this._fetchImagesBasedOnProps()
   } // _toggleNegativity
 
   // given to ScrollableFlatList as its onCategoryItemPress callback
@@ -231,6 +229,22 @@ export default class HomeScreen extends React.Component {
     this._fetchImagesBasedOnProps()
   } // _onDeleteSearchItem
 
+  _onFilterDrag = (item) => {
+      console.log(item)
+      /*let containsItem = false
+      this.state.andArrays.forEach((containedItem) => {
+        if(item.term == containedItem.term) {
+          containsItem = true
+        }
+      })
+
+      if (containsItem) return
+
+      this.setState(prevState => ({
+        andArrays: [...prevState.andArrays, item]
+      }))*/
+  }
+
   _multiSliderValuesChange = values => {
     this.setState({
       multiSliderValue: values,
@@ -280,6 +294,7 @@ export default class HomeScreen extends React.Component {
                   data = {this.state.andArrays}
                   onDelete = {this._onDeleteSearchItem}
                   toggleNegativity = {this._toggleNegativity}
+                  onFilterDrag = {this._onFilterDrag}
             />
           }
           <ScrollableFlatList
@@ -322,21 +337,21 @@ export default class HomeScreen extends React.Component {
           <TimeLineSlider selectedStartYear={this.state.multiSliderValue[0]} selectedEndYear={this.state.multiSliderValue[1]} multiSliderValuesChange={this._multiSliderValuesChange} />
         }
         <FlatList 
-          style = {{marginTop:5}}
+          style = {{ marginRight: 2.5, marginLeft: 2.5}}
           vertical            
           removeClippedSubviews
           disableVirtualization
           data = {this.state.chosenImages || []}
-          numColumns = { 2 }
+          numColumns = { 3 }
           renderItem = {({ item: rowData }) => {
 
             const smallImageUrl = API.smallImageDisplayUrl(rowData)
             const fullImageUrl = API.fullImageDisplayUrl(rowData) // shown when opening the image details
             // console.log("rowData: " + rowData)
             return (
-                <TouchableWithoutFeedback onPress={() => navigate('Details', { name: "", imageurl: fullImageUrl })}>
+                <TouchableWithoutFeedback onPress={() => navigate('Details', { width:this.state.screenWidth, imageurl: fullImageUrl })}>
                   <View style={styles.box2} >
-                    <ImageCardListItem name="" imageUrl={smallImageUrl}/>
+                    <ImageCardListItem imageUrl={fullImageUrl}/>
                   </View>
                 </TouchableWithoutFeedback>
             )
@@ -367,7 +382,7 @@ const styles = StyleSheet.create({
     flex: 1
   },
   box2: {
-    flex: 2
+    flex: 1,
   },
   button: {
     shadowColor: 'rgba(0,0,0, .4)', // IOS

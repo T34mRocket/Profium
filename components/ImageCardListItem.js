@@ -1,21 +1,14 @@
 import React from 'react'
 import { StyleSheet, Dimensions } from 'react-native'
-import { Card, CardTitle, CardContent, CardAction, CardButton, CardImage } from 'react-native-cards'
+//import { Card, CardTitle, CardContent, CardAction, CardButton, CardImage } from 'react-native-cards'
+import { Card } from 'react-native-paper';
 
-const ImageCardListItem = ({ name, imageUrl }) => {
+const ImageCardListItem = ({ imageUrl }) => {
 
   return (
-    <Card>
-      <CardTitle
-        subtitle = {name}
-        style={{ maxHeight: 50 }}
-      />
-      <CardImage
-        style = {styles.image}
-        resizeMode = {'contain'}
-        source={{ uri: imageUrl }}
-      />
-    </Card>
+      <Card style={styles.image}>
+          <Card.Cover  source={{ uri: imageUrl }} />
+      </Card>
   )
 }
 
@@ -23,9 +16,8 @@ export default ImageCardListItem
 
 const styles = StyleSheet.create({
   image: {
-    backgroundColor: 'white',
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    marginBottom:5,
+    marginLeft: 2.5,
+    marginRight: 2.5
   }
 })
