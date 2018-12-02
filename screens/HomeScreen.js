@@ -140,18 +140,20 @@ export default class HomeScreen extends React.Component {
 
   // passed all the way down to individual SearchItem components
   _toggleNegativity = (term, subArrayIndex) => {
+
     // NOTE: there might be a less convoluted way to do this, but rn I can't think of it
-  
     let subArray = this.state.andArrays[subArrayIndex].slice()
     subArray.map(queryData => {
         if (queryData.term === term) {
         queryData.isNegative = !queryData.isNegative
       }
     }) // map
-      let tempAndArraysState = this.state.andArrays.slice() // copy the state... inefficient but whatever
+    
+    let tempAndArraysState = this.state.andArrays.slice() // copy the state... inefficient but whatever
     tempAndArraysState[subArrayIndex] = subArray
     this.setState({ andArrays: tempAndArraysState })
-      this._fetchImagesBasedOnProps()
+    
+    this._fetchImagesBasedOnProps()
   } // _toggleNegativity
 
   // given to ScrollableFlatList as its onCategoryItemPress callback
@@ -229,21 +231,53 @@ export default class HomeScreen extends React.Component {
     this._fetchImagesBasedOnProps()
   } // _onDeleteSearchItem
 
-  _onFilterDrag = (item) => {
-      console.log(item)
-      /*let containsItem = false
-      this.state.andArrays.forEach((containedItem) => {
-        if(item.term == containedItem.term) {
-          containsItem = true
-        }
-      })
+  // called when dropping a visual search item on another in the top pen
+  _onFilterDrag = (from, to, andArray) => {
 
-      if (containsItem) return
+      // console.log("draggedFromIndex: " + from)
+      // console.log("draggedToIndex: " + to)
+      // console.log("new combined andArray: " + andArray)
 
-      this.setState(prevState => ({
-        andArrays: [...prevState.andArrays, item]
-      }))*/
-  }
+      // TODO: the visual ui elements are not combined correctly (only one item remains after combination)
+
+      let tempAndArraysState = this.state.andArrays.slice()
+      tempAndArraysState[to] = andArray
+      tempAndArraysState.splice(from, 1)
+      this.setState({ andArrays: tempAndArraysState })
+
+      this._fetchImagesBasedOnProps()
+  } // _onFilterDrag
+
+  // not used atm, because identicality has already been checked... preserved for now in case we need it
+  _checkIfIdenticalQueries = (draggedArrayIndex, indexOfDroppedOnArray, newAndArray) => {
+
+    let identicalQueries = false
+    let itemCount = newAndArray.length
+    let identicalItemCount = 0
+    this.state.andArrays.forEach((andArray, index) => {
+
+      // we won't compare to the old arrays that are already in the state, 
+      // since they are to be replaced / removed in any case
+      if (index !== draggedArrayIndex && index !== indexOfDroppedOnArray) {
+
+        andArray.forEach(queryData => {
+
+          newAndArray.forEach(queryData2 => {
+ 
+            if (queryData.isEqualTo(queryData2)) {
+
+              identicalItemCount++
+            }
+          }) // inner forEach
+
+          if (identicalItemCount === itemCount) {
+            identicalQueries = true
+          }
+        }) // mid-forEach
+      } // index-if
+    }) // outer forEach
+    return identicalQueries
+  } // _checkIfIdenticalQueries
 
   _multiSliderValuesChange = values => {
     this.setState({
@@ -276,10 +310,10 @@ export default class HomeScreen extends React.Component {
     // console.log(this.state.topLevelProps)
     // console.log("props array in render:")
     /* this.state.andArrays.forEach(array => {
-      array.forEach(item => {
+      array.forEach(queryData => {
 
-        console.log(item.toString())
-      })
+        console.log(queryData.term)
+      }) 
     }) */
 
     return (

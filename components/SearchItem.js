@@ -20,18 +20,15 @@ export default class SearchItem extends React.Component {
   // passed down all the way from HomeScreen
   _toggleNegativity = () => {
 
-    console.log("called toggleNegativity")
+    // console.log("called toggleNegativity")
     this.props.toggleNegativity(this.props.queryData.term, this.props.containerArrayIndex)
   }
 
   render() {
 
-    // console.log("term in SearchItem component: " + this.state.term)
+    console.log("term within SearchItem render: " + this.props.queryData.term)
 
     return (
-      /*<Chip onPress={() => {this._toggleNegativity()}} onClose={() => {this._onDeleteItem()}} style={styles.chip}>
-        {this.props.queryData.term}
-      </Chip>*/
       <TouchableOpacity
         style={{ 
           height: 40, 

@@ -17,4 +17,11 @@ export default class QueryData {
     return `term: ${this.term}, negative: ${this.isNegative}`
   }
 
+  // this definition of equality makes sense for ui and logical purposes 
+  // (queries of type 'alive AND NOT alive' are generally not useful)
+  isEqualTo = (queryData) => {
+
+    return this.term === queryData.term ? true : false
+  }
+
 } // class

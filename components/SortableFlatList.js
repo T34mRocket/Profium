@@ -138,21 +138,23 @@ class SortableFlatList extends Component {
       }
     })
     this.state = initialState
-  }
+  } // constructor
 
   onReleaseAnimationEnd = () => {
+    
     const { data, onMoveEnd } = this.props
     const { activeRow, spacerIndex } = this.state
     const sortedData = this.getSortedList(data, activeRow, spacerIndex)
     const isAfterActive = this._spacerIndex > activeRow
     const combinedList = this.combineNewList(data, activeRow, this._spacerIndex, isAfterActive)
+    // console.log("combinedList: " + combinedList.toString())
     this._moveAnim.setValue(this._releaseVal)
     this._spacerIndex = -1
     this.setState(initialState)
     this._hasMoved = false
     this._move = 0
     this._releaseAnim = null
-    onMoveEnd && onMoveEnd({
+    onMoveEnd && onMoveEnd({ // in practice, onMoveEnd = onFilterDrag in HomeScreen
       row: data[activeRow],
       from: activeRow,
       to: spacerIndex - (isAfterActive ? 1 : 0),
@@ -160,30 +162,36 @@ class SortableFlatList extends Component {
     })
   }
 
-
   combineNewList = (data, activeRow, spacerIndex, isAfterActive) => {
-    console.log("active "+activeRow+" spacer "+spacerIndex+ " isAfter "+isAfterActive)
-    if (activeRow === spacerIndex) return data
+    
+    // note: this should never happen I guess... but it will almost certainly crash the app if it does! fix asap!
+    if (activeRow === spacerIndex) return {} 
+    
     let combinedTo = spacerIndex
     if(isAfterActive){
       combinedTo = spacerIndex-1
     } 
-    let combinedData = null
-    let newCombinedList = [...data]
-    if(data[activeRow]!= undefined && data[combinedTo] != null && this.state.onTopOfNextComponent){
-      combinedData = data[activeRow]+", "+data[combinedTo]
-      if(isAfterActive){
-        data.splice(activeRow,1)
-        data.splice(combinedTo-1,1)
-      } else {
-        data.splice(activeRow,1)
-        data.splice(combinedTo,1)
+    // console.log(`draggedFrom: ${activeRow}, draggedTo: ${combinedTo}`)
+
+    const from = activeRow
+    const to = combinedTo
+
+    let toArray = data[to].slice()
+    let fromArray = data[from].slice()
+    let combinedArray = [...toArray, ...fromArray]
+
+    for (let i = 0; i < combinedArray.length; i++ ) {
+
+      for (let j = combinedArray.length-1; j >= 0; j--) {
+
+        if (combinedArray[i].isEqualTo(combinedArray[j]) && i !== j) {
+          combinedArray.splice(j, 1)
+        }
       }
-  
-      newCombinedList = [...data, combinedData]
     }
-    return newCombinedList
-  }
+
+    return { from: from, to: to, andArray: combinedArray }
+  } // combineNewList
 
   getSortedList = (data, activeRow, spacerIndex) => {
     if (activeRow === spacerIndex) return data

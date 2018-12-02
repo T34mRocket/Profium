@@ -9,6 +9,13 @@ import SortableFlatList from './SortableFlatList'
 const SelectedFiltersFlatList = ({ data, onDelete, toggleNegativity, onFilterDrag }) => {
 
   renderItem = ({ item, index, move, moveEnd, isActive }) => {
+
+    /*
+    console.log("searchItems prop given to AndContainer in SelectedFiltersFlatList: ")
+    item.forEach(queryData => {
+      console.log(queryData.term)
+    }) */
+
     return (
       /*<TouchableOpacity
         style={{ 
@@ -28,11 +35,24 @@ const SelectedFiltersFlatList = ({ data, onDelete, toggleNegativity, onFilterDra
           }}>{item}</Text>
           <Icon name='close' type='AntDesign' style={{ paddingLeft:15, paddingRight:15, margin:5 }} onPress={() => {onDelete(item)}}></Icon>
       </TouchableOpacity>*/
-      <AndContainer searchItems={item} onDelete={onDelete} indexInMainArray={index} toggleNegativity={toggleNegativity} move={move} moveEnd={moveEnd} isActive={isActive} />
-      
+      <AndContainer 
+        searchItems={item} 
+        onDelete={onDelete} 
+        indexInMainArray={index} 
+        toggleNegativity={toggleNegativity} 
+        move={move} 
+        moveEnd={moveEnd} 
+        isActive={isActive} 
+      />
     )
   }
-
+  /*
+  console.log("andArrays data in SelectedFiltersFlatList: ")
+  data.forEach(andArray => {
+    andArray.forEach(queryData => {
+      console.log("term:" + queryData.term)
+    })
+  }) */
 
   // console.log("type of onDelete in SelectedFiltersFlatList: " + typeof onDelete)
   return (
@@ -44,7 +64,7 @@ const SelectedFiltersFlatList = ({ data, onDelete, toggleNegativity, onFilterDra
           renderItem={this.renderItem}
           keyExtractor={(item, index) => `draggable-item-${item}`}
           scrollPercent={5}
-          onMoveEnd={({ data }) => {onFilterDrag(data)}}
+          onMoveEnd={({ data }) => {onFilterDrag(data.from, data.to, data.andArray)}}
         />
         {/*<SortableFlatList 
         style = {{ height: 40, maxHeight: 40}}

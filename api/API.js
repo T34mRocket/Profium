@@ -60,7 +60,7 @@ export default API = {
       },
       body: `${QUERY_START}${config.query}`
     }
-    console.log("body: " + options.body)
+    // console.log("query body: " + options.body)
 
     // using await + async would be better, but it's easier to do this since it's familiar
     return fetch(request, options)
@@ -165,7 +165,7 @@ export default API = {
     }) // forEach
     queryString += ` FILTER ( ?date >= '${startDate}'^^${DATE_FORMAT} %26%26 ?date <= '${endDate}'^^${DATE_FORMAT} ) } ${ORDER_BY_DATE_DESC}`
 
-    console.log("query: " + queryString)
+    // console.log("query: " + queryString)
     const config = {
       query: queryString
     }
