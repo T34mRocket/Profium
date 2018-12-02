@@ -497,19 +497,15 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     margin: 5,
     backgroundColor: 'rgba(0, 180, 0, 0.8)',
-    borderRadius: 10,
   },
   notOnTop: {
     backgroundColor: 'red',
     overflow: 'hidden',
     marginLeft: 10,
     marginRight: 10,
-    borderRadius: 10,
   },
   component: {
-    marginLeft: 5,
     marginRight: 5,
-    borderRadius: 10,
     backgroundColor: 'white'
   }
 })

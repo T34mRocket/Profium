@@ -2,6 +2,7 @@ import React from 'react'
 import { ScrollView, StyleSheet, View, Image } from 'react-native'
 import { CardTitle, CardContent, CardAction, CardButton, CardImage } from 'react-native-cards'
 import { Button, Card, Title, Paragraph } from 'react-native-paper';
+import SelectedFiltersFlatList from '../components/SelectedFiltersFlatList';
 
 export default class DetailsScreen extends React.Component {
   static navigationOptions = {
@@ -36,39 +37,51 @@ export default class DetailsScreen extends React.Component {
   }
 
   render() {
+      console.log(this.props.navigation.state.params.data)
       return (
-      <ScrollView style={styles.container}>
-        <Card style={styles.card}>
-          <Card.Cover style={{height:this.state.height}} source={{uri: this.props.navigation.state.params.imageurl}} />
-          <Card.Actions>
-            <Button>Cancel</Button>
-            <Button>Ok</Button>
-          </Card.Actions>
-          
-          <Card.Content>
-            <Title>Card title</Title>
-            <Paragraph>Card content</Paragraph>
-            <View style={styles.row}>
-            <View style={styles.box1}>
-              <CardTitle
-                subtitle="Data"
-              />
-              <CardContent text={`Name`} />
-              <CardContent text={`Description`} />
-              <CardContent text={`Taken`} />
+      <View style={{flex:1}}>
+        {/*
+        // Show the filters also in Details view. This is not working properly yet
+        <SelectedFiltersFlatList
+                data = {this.props.navigation.state.params.data}
+                onDelete = {this.props.navigation.state.params.onDelete}
+                toggleNegativity = {this.props.navigation.state.params.toggleNegativity}
+                onFilterDrag = {this.props.navigation.state.params.onFilterDrag}
+        />
+        */}
+        <ScrollView style={styles.container}>
+          <Card style={styles.card}>
+            <Card.Cover style={{height:this.state.height}} source={{uri: this.props.navigation.state.params.imageurl}} />
+            <Card.Actions>
+              <Button>Cancel</Button>
+              <Button>Ok</Button>
+            </Card.Actions>
+            
+            <Card.Content>
+              <Title>Card title</Title>
+              <Paragraph>Card content</Paragraph>
+              <View style={styles.row}>
+              <View style={styles.box1}>
+                <CardTitle
+                  subtitle="Data"
+                />
+                <CardContent text={`Name`} />
+                <CardContent text={`Description`} />
+                <CardContent text={`Taken`} />
+              </View>
+              <View style={styles.box2} >
+                <CardTitle
+                    subtitle={`More data`}
+                />
+                <CardContent text={`something`} />
+                <CardContent text={`something`} />
+                <CardContent text={`something`} />
+              </View>
             </View>
-            <View style={styles.box2} >
-              <CardTitle
-                  subtitle={`More data`}
-              />
-              <CardContent text={`something`} />
-              <CardContent text={`something`} />
-              <CardContent text={`something`} />
-            </View>
-          </View>
-          </Card.Content>
-        </Card>
-      </ScrollView>
+            </Card.Content>
+          </Card>
+        </ScrollView>
+      </View>
     )
   }
 }

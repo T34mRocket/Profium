@@ -2,14 +2,13 @@ import React from 'react'
 import { Text, TouchableOpacity, FlatList, StyleSheet, View } from 'react-native'
 
 import '../api/API'
-import HierarchySeparatorLine from './HierarchySeparatorLine';
 
 const ScrollableFlatList = ({ data, onCategoryItemPress }) => {
 
   return (
     <View>
       <FlatList 
-        style = {{ height: 40, maxHeight: 40}}
+        style = {{ height: 40, maxHeight: 40, marginTop: 3}}
         horizontal            
         showsHorizontalScrollIndicator = {false}
         data = {data}
@@ -28,7 +27,6 @@ const ScrollableFlatList = ({ data, onCategoryItemPress }) => {
         }}
         keyExtractor = {(item, index) => index.toString()}
       />
-      <HierarchySeparatorLine/>
     </View>
   )
 }
