@@ -16,7 +16,7 @@ export default class AndContainer extends React.Component {
   }
 
   render() {
-
+    
     // console.log("triggered rerender for Search Items!")
     // console.log("type of onDelete in AndContainer render: " + typeof this.onDeleteItem)
     const termList = this.props.searchItems.map( (queryData) => 
@@ -30,6 +30,7 @@ export default class AndContainer extends React.Component {
         move={this.props.move} 
         moveEnd={this.props.moveEnd} 
         isActive={this.props.isActive}
+        allSearchItemsInAndArray={this.props.searchItems}
         />
     )
     /* termList.forEach(item =>
