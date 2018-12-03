@@ -2,6 +2,8 @@
   "name": "my-new-project",
   "main": "node_modules/expo/AppEntry.js",
   "private": true,
+  "homepage": "https://T34mRocket.github.io/Profium/",
+
   "scripts": {
     "start": "expo start",
     "android": "expo start --android",
@@ -9,6 +11,7 @@
     "eject": "expo eject",
     "test": "node ./node_modules/jest/bin/jest.js --watchAll"
   },
+
   "jest": {
     "preset": "jest-expo"
   },
@@ -20,9 +23,12 @@
     "react-native": "https://github.com/expo/react-native/archive/sdk-31.0.0.tar.gz",
     "react-native-cards": "^1.1.4",
     "react-native-custom-picker": "^0.3.1",
+<<<<<<< HEAD
     "react-native-elements": "^0.19.1",
     "react-native-paper": "^2.2.4",
     "react-native-swipe-gestures": "^1.0.2",
+=======
+>>>>>>> 0aa23603a605aab90e8fb02b2875898a2f5f9876
     "react-native-xml2js": "^1.0.3",
     "react-navigation": "^2.18.2"
   },
