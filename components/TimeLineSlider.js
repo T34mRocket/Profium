@@ -10,7 +10,6 @@ const TimeLineSlider = ({ selectedStartYear, selectedEndYear, multiSliderValuesC
 
   return (
           <View style={styles.sliderContainer}>
-            <Card>
               <View style={styles.multiSlider}>
               <CardContent style={{marginTop:5}} text={`Choose Timeline`} />
                 <View style={styles.sliderTextContainer}>
@@ -35,7 +34,6 @@ const TimeLineSlider = ({ selectedStartYear, selectedEndYear, multiSliderValuesC
                   snapped
                 />
               </View>
-            </Card>
           </View>
   )
 }
@@ -47,7 +45,10 @@ const styles = StyleSheet.create({
         flexDirection: 'column',
         height:100,
         maxHeight:100,
-        borderRadius: 10
+        backgroundColor: 'white',
+        marginLeft: 5,
+        marginRight: 5,
+        elevation: 15,
     },  
     multiSlider: {
         flex:2,

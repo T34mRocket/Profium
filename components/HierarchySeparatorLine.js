@@ -16,6 +16,6 @@ const styles = StyleSheet.create({
   line: {
     borderBottomColor: 'grey',
     borderBottomWidth: 1,
-    margin: 5
+    marginTop: 5,
   }
 })

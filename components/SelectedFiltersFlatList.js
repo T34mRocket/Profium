@@ -56,7 +56,7 @@ const SelectedFiltersFlatList = ({ data, onDelete, toggleNegativity, onFilterDra
 
   // console.log("type of onDelete in SelectedFiltersFlatList: " + typeof onDelete)
   return (
-    <View style={{ height: 50, maxHeight: 50 }}>
+    <View style={{ height: 50, maxHeight: 50, backgroundColor: '#517fa4', paddingTop: 5, paddingLeft: 5, elevation: 5 }}>
         <SortableFlatList
           data={data}
           horizontal

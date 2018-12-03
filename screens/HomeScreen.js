@@ -318,42 +318,49 @@ export default class HomeScreen extends React.Component {
 
     return (
       <SafeAreaView style={ styles.container }>
-        <GestureRecognizer
+        {/*<GestureRecognizer
           //onSwipeUp={(state) => this._onSwipeUp(state)}
           onSwipeUp={() => this._closeOrOpenSubCategoryFlatList()}
           config={config}
-        >    
-          {(this.state.andArrays.length > 0) && 
-            <SelectedFiltersFlatList
-                  data = {this.state.andArrays}
-                  onDelete = {this._onDeleteSearchItem}
-                  toggleNegativity = {this._toggleNegativity}
-                  onFilterDrag = {this._onFilterDrag}
-            />
-          }
-          <ScrollableFlatList
-                onCategoryItemPress={this._onFlatListItemPress}
-                data = {this.state.topLevelProps}
+        >    */}
+        {(this.state.andArrays.length > 0) && 
+          <SelectedFiltersFlatList
+                data = {this.state.andArrays}
+                onDelete = {this._onDeleteSearchItem}
+                toggleNegativity = {this._toggleNegativity}
+                onFilterDrag = {this._onFilterDrag}
           />
-          {/*Show the new sub category FlatList when clicking item from Main category FlatList*/}
-          {(this.state.showSubCategory) && 
-            (<ScrollableFlatList
-                      onCategoryItemPress={this._onFlatListItemPress}
-                      data = {this.state.subCategoryOptions}/>
-            )
-          }
+        }
+        <ScrollableFlatList
+              onCategoryItemPress={this._onFlatListItemPress}
+              data = {this.state.topLevelProps}
+        />
+        {/*Show the new sub category FlatList when clicking item from Main category FlatList*/}
+        {(this.state.showSubCategory) && 
+          (<ScrollableFlatList
+                    onCategoryItemPress={this._onFlatListItemPress}
+                    data = {this.state.subCategoryOptions}/>
+          )
+        }
+        {(this.state.chosenImages.length > 0) && (
           <View style={styles.timeCheckboxAndCloseSubCategory}>
             <View style={styles.timeBox}>
               <Checkbox
+                color={'#517fa4'}
                 status={this.state.showSlider ? 'checked' : 'unchecked'}
                 onPress={() => { this.setState(prevState => ({ showSlider: !prevState.showSlider })); this._fetchImagesBasedOnProps() }}
               />
-              <Text style={{alignSelf:'center'}}>Search by time</Text>
+              <Text style={{marginTop: 5, paddingTop:3}}>Search by time</Text>
             </View>
             <View style={styles.closeSubCategoryBox}>
               {/*Show the arrow only if there is subcategory data*/}
               {((this.state.subCategoryOptions && this.state.iconArrow)) && 
                 (<Icon
+                  containerStyle={{marginTop:5, marginBottom:5}}
+                  raised
+                  reverse
+                  underlayColor={'transparent'}
+                  size={14}
                   name={this.state.iconArrow}
                   type='entypo'
                   color='#517fa4'
@@ -363,36 +370,52 @@ export default class HomeScreen extends React.Component {
               }
             </View>
             {/*Empty view so that the arrow icon is in center of screen*/}
-            <View style={{flex:1}}>
+            <View style={styles.resultsBox}>
+              <Text style={{fontSize:18}}>Results: {this.state.chosenImages.length}</Text>
             </View>
           </View>
-        </GestureRecognizer>
+        )}
+        {/*</GestureRecognizer>*/}
         {(this.state.showSlider) && 
           <TimeLineSlider selectedStartYear={this.state.multiSliderValue[0]} selectedEndYear={this.state.multiSliderValue[1]} multiSliderValuesChange={this._multiSliderValuesChange} />
         }
-        <FlatList 
-          style = {{ marginRight: 2.5, marginLeft: 2.5}}
-          vertical            
-          removeClippedSubviews
-          disableVirtualization
-          data = {this.state.chosenImages || []}
-          numColumns = { 3 }
-          renderItem = {({ item: rowData }) => {
+        {(this.state.chosenImages.length > 0) && (
+          <FlatList 
+            style = { styles.imagesFlatList }
+            vertical            
+            removeClippedSubviews
+            disableVirtualization
+            data = {this.state.chosenImages || []}
+            numColumns = { 3 }
+            renderItem = {({ item: rowData }) => {
 
-            const smallImageUrl = API.smallImageDisplayUrl(rowData)
-            const fullImageUrl = API.fullImageDisplayUrl(rowData) // shown when opening the image details
-            // console.log("rowData: " + rowData)
-            return (
-                <TouchableWithoutFeedback onPress={() => navigate('Details', { width:this.state.screenWidth, imageurl: fullImageUrl })}>
-                  <View style={styles.box2} >
-                    <ImageCardListItem imageUrl={fullImageUrl}/>
-                  </View>
-                </TouchableWithoutFeedback>
-            )
-          }}
-          keyExtractor={(item, index) => index.toString()}
-        />
-        </SafeAreaView>
+              const smallImageUrl = API.smallImageDisplayUrl(rowData)
+              const fullImageUrl = API.fullImageDisplayUrl(rowData) // shown when opening the image details
+              // console.log("rowData: " + rowData)
+              return (
+                  <TouchableWithoutFeedback onPress={() => navigate('Details', { 
+                      width: this.state.screenWidth, 
+                      imageurl: fullImageUrl,
+                      //data: this.state.andArrays,
+                      //onDelete: this._onDeleteSearchItem,
+                      //toggleNegativity: this._toggleNegativity,
+                      //onFilterDrag: this._onFilterDrag,
+                    })}>
+                    <View style={styles.box2} >
+                      <ImageCardListItem imageUrl={fullImageUrl}/>
+                    </View>
+                  </TouchableWithoutFeedback>
+              )
+            }}
+            keyExtractor={(item, index) => index.toString()}
+          />
+        )}
+        {(this.state.chosenImages.length===0)&& (
+          <View style={{flex:0.5, justifyContent: 'space-around', height: 300, maxHeight: 300, backgroundColor: 'white', margin: 5, elevation: 10, margin: 5, padding: 5}}>
+            <Text style={{fontSize: 20}}>Information</Text>
+            <Text>Search images by clicking/tapping the main categories on top. This will show the images that belong to the category. Selected filters will pop up on the most top row after searching and sub categories will be seen on bottom of the main categories (if there are any). Selected filters (which will be seen on top after searching) can be combined (by long pressing and after it, dragging) for new type of queries, or deleted if no longer needed. If the filter is clicked just once, it will make it 'negative' item.</Text>
+          </View>)}
+      </SafeAreaView>
     ) // return
   } // render
 } // class
@@ -402,7 +425,7 @@ const styles = StyleSheet.create({
     flex: 1, 
     flexDirection: 'column', 
     justifyContent: 'flex-start', 
-    marginTop: StatusBar.currentHeight+5 
+    marginTop: StatusBar.currentHeight
   },
   column: {
     flex: 1,
@@ -436,16 +459,40 @@ const styles = StyleSheet.create({
     flexDirection: 'row', 
     justifyContent:'center', 
     marginLeft: 5, 
-    marginRight: 5
+    marginRight: 5,
+    backgroundColor: 'white', 
+    elevation: 10, 
+    borderTopRightRadius: 5, 
+    borderTopLeftRadius: 5,
   },
   timeBox: {
     flex:1, 
-    flexDirection: 'row'
+    flexDirection: 'row',
+    paddingTop: 5,
   },
   closeSubCategoryBox: {
     flex:1, 
     flexDirection: 'row', 
     alignSelf:'center', 
-    justifyContent:'center'
+    justifyContent:'center',
+    borderBottomLeftRadius: 5,
+    borderBottomRightRadius: 5
+  },
+  resultsBox: {
+    flex:1, 
+    borderTopLeftRadius: 5,
+    borderTopRightRadius: 5,
+    backgroundColor: 'white',
+    alignSelf: 'center',
+    justifyContent: 'flex-end',
+  },
+  imagesFlatList: {
+    backgroundColor: 'white', 
+    elevation: 10, 
+    borderBottomRightRadius: 5, 
+    borderBottomLeftRadius: 5, 
+    paddingTop: 2.5, 
+    marginRight: 5, 
+    marginLeft: 5
   }
 }) // styles
