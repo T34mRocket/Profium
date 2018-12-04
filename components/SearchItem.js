@@ -27,7 +27,7 @@ export default class SearchItem extends React.Component {
   render() {
 
     console.log("term within SearchItem render: " + this.props.queryData.term)
-
+    console.log("is negative?: " + this.props.queryData.negative)
     // this.props.allSearchItemsInAndArray will look something like:
     // term: tekninen kuva, negative: false,term: hallinto, negative: false
     const objectString = this.props.allSearchItemsInAndArray.toString()
@@ -53,6 +53,7 @@ export default class SearchItem extends React.Component {
           style={{ 
             height: 40, 
             //backgroundColor: `${ !this.props.isActive }%` ? 'rgba(52, 52, 52, 0.8)' : 'white',
+            backgroundColor: this.props.queryData.isNegative ? 'rgba(142, 142, 142, 0.6)' : 'transparent',
             alignItems: 'center', 
             justifyContent: 'center',
             flexDirection: "row",
@@ -76,6 +77,7 @@ export default class SearchItem extends React.Component {
           style={{ 
             height: 40, 
             //backgroundColor: `${ !this.props.isActive }%` ? 'rgba(52, 52, 52, 0.8)' : 'white',
+            backgroundColor: this.props.queryData.isNegative ? 'rgba(142, 142, 142, 0.6)' : 'transparent',
             alignItems: 'center', 
             justifyContent: 'center',
             flexDirection: "row",
