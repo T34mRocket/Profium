@@ -179,7 +179,7 @@ export default class HomeScreen extends React.Component {
     if(oneItemSubArrayContainsItem) return
 
     this.setState(prevState => ({
-      andArrays: [...prevState.andArrays, [new QueryData(item, false)]] // queries are positive by default
+      andArrays: [[new QueryData(item, false)], ...prevState.andArrays] // queries are positive by default
     }))
     this._fetchImagesBasedOnProps()
     
