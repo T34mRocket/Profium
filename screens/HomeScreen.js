@@ -234,6 +234,8 @@ export default class HomeScreen extends React.Component {
   // called when dropping a visual search item on another in the top pen
   _onFilterDrag = (from, to, andArray) => {
 
+    if (from === to) return
+
       // console.log("draggedFromIndex: " + from)
       // console.log("draggedToIndex: " + to)
       // console.log("new combined andArray: " + andArray)

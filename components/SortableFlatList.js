@@ -165,7 +165,7 @@ class SortableFlatList extends Component {
   combineNewList = (data, activeRow, spacerIndex, isAfterActive) => {
     
     // note: this should never happen I guess... but it will almost certainly crash the app if it does! fix asap!
-    if (activeRow === spacerIndex) return {} 
+    // if (activeRow === spacerIndex) return {} 
     
     let combinedTo = spacerIndex
     if(isAfterActive){
