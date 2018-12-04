@@ -27,7 +27,6 @@ export default class SearchItem extends React.Component {
   render() {
 
     console.log("term within SearchItem render: " + this.props.queryData.term)
-    console.log("is negative?: " + this.props.queryData.negative)
     // this.props.allSearchItemsInAndArray will look something like:
     // term: tekninen kuva, negative: false,term: hallinto, negative: false
     const objectString = this.props.allSearchItemsInAndArray.toString()
