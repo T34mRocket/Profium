@@ -52,6 +52,9 @@ const subCategoryTemporaryData2 = [
 const DEFAULT_START_DATE = 1960
 const DEFAULT_END_DATE = (new Date()).getFullYear()
 
+// max number of search terms that can be present in the top pen
+const MAX_QUERIES = 5
+
 export default class HomeScreen extends React.Component {
   static navigationOptions = {
     header: null,
@@ -176,7 +179,7 @@ export default class HomeScreen extends React.Component {
     // you can't add more than one 'orphan' search term; e.g. 'dog' OR 'dog' OR 'dog'.
     // combining terms with other terms twice or more is fine though;
     // e.g. 'dog AND alive' OR 'dog AND red'
-    if(oneItemSubArrayContainsItem) return
+    if(oneItemSubArrayContainsItem || this.state.andArrays.length > MAX_QUERIES) return
 
     this.setState(prevState => ({
       andArrays: [[new QueryData(item, false)], ...prevState.andArrays] // queries are positive by default
@@ -249,6 +252,26 @@ export default class HomeScreen extends React.Component {
 
       this._fetchImagesBasedOnProps()
   } // _onFilterDrag
+
+  // rowData is the unaltered imageUrl.
+  // NOTE: having to do this is bs of the highest order; there's probably a better way.
+  // the getImageDetails function is asynchronous, so there's no 'time' to pass its result to 
+  // navigate() unless I do it like this
+  _navigateWithDelay = (fullImageUrl, rowData, navigate) => {
+
+    API.getImageDetails(rowData).then(imageDetails => {
+
+      navigate('Details', { 
+        width: this.state.screenWidth, 
+        imageurl: fullImageUrl,
+        imageDetails: imageDetails
+        //data: this.state.andArrays,
+        //onDelete: this._onDeleteSearchItem,
+        //toggleNegativity: this._toggleNegativity,
+        //onFilterDrag: this._onFilterDrag,
+      })
+    })
+  } // _navigateWithDelay
 
   // not used atm, because identicality has already been checked... preserved for now in case we need it
   _checkIfIdenticalQueries = (draggedArrayIndex, indexOfDroppedOnArray, newAndArray) => {
@@ -395,14 +418,7 @@ export default class HomeScreen extends React.Component {
               const fullImageUrl = API.fullImageDisplayUrl(rowData) // shown when opening the image details
               // console.log("rowData: " + rowData)
               return (
-                  <TouchableWithoutFeedback onPress={() => navigate('Details', { 
-                      width: this.state.screenWidth, 
-                      imageurl: fullImageUrl,
-                      //data: this.state.andArrays,
-                      //onDelete: this._onDeleteSearchItem,
-                      //toggleNegativity: this._toggleNegativity,
-                      //onFilterDrag: this._onFilterDrag,
-                    })}>
+                  <TouchableWithoutFeedback onPress={() => this._navigateWithDelay(fullImageUrl, rowData, navigate)}>
                     <View style={styles.box2} >
                       <ImageCardListItem imageUrl={fullImageUrl}/>
                     </View>

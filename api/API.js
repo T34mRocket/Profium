@@ -112,6 +112,54 @@ export default API = {
     return this.query(config, false)
   }, // getTopLevelImageProps
 
+  
+  // called when clicking on an image to enter the detail view
+  getImageDetails: function(imageUrl) {
+
+    const timeStampPromise = this._getImageTimeStamp(imageUrl).then(resultsSet => {
+
+      const timeStamp = Array.from(resultsSet)[0] // should only contain one value
+      // console.log("timestamp: " + timeStamp)
+      return timeStamp
+    })
+
+    const tagsPromise = this._getImageTags(imageUrl).then(resultsSet2 => {
+
+      const tags = Array.from(resultsSet2)
+       tags.forEach(item => {
+        // console.log("tag: " + item)
+      }) 
+      return tags
+    })
+
+    return Promise.all([timeStampPromise, tagsPromise]).then(resultsarray => {
+
+      return { timeStamp: resultsarray[0], tags: resultsarray[1] }
+    })
+  }, // getImageDetails
+
+  _getImageTimeStamp: function(imageUrl) {
+
+    const query = `SELECT DISTINCT ?timestamp WHERE { ?depic ${DEPICTED_OBJ_INV} '${imageUrl}' . 
+    ?depic ${MOD_DATE} ?timestamp }`
+
+    const config = {
+      query: query
+    }
+    return this.query(config, false)
+  },
+
+  _getImageTags: function(imageUrl) {
+
+    const query = `SELECT DISTINCT ?tag WHERE { ?depic ${DEPICTED_OBJ_INV} '${imageUrl}' . 
+    ?depic ${DOC_SPECIFIER} ?tag }`
+
+    const config = {
+      query: query
+    }
+    return this.query(config, false)
+  },
+
   // queryArray is an array of arrays of AND-type searches (which contain QueryData objects).
   // startDate and endDate are properties in HomeScreen's state (set by moving the slider)
   onChoosingPropsGetUrls: function(queryArray, startDate, endDate) {

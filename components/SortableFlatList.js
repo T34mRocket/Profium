@@ -164,15 +164,15 @@ class SortableFlatList extends Component {
 
   combineNewList = (data, activeRow, spacerIndex, isAfterActive) => {
     
-    // note: this should never happen I guess... but it will almost certainly crash the app if it does! fix asap!
-    // if (activeRow === spacerIndex) return {} 
-    
     let combinedTo = spacerIndex
     if(isAfterActive){
       combinedTo = spacerIndex-1
     } 
     // console.log(`draggedFrom: ${activeRow}, draggedTo: ${combinedTo}`)
 
+    // note: if the indexes are the same, ideally this method would return early.
+    // it's not too harmful to have it go through the motions anyway though,
+    // so I'm leaving it like this for the moment. priorities, etc.
     const from = activeRow
     const to = combinedTo
 
