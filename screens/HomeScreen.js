@@ -11,7 +11,6 @@ import {
   View,
   Alert,
   FlatList,
-  Button,
   StatusBar,
   SafeAreaView,
   Dimensions
@@ -20,10 +19,10 @@ import { WebBrowser } from 'expo'
 import GestureRecognizer, {swipeDirections} from 'react-native-swipe-gestures';
 import { Icon } from 'react-native-elements'
 import { Checkbox } from 'react-native-paper'
-
+import { Button, Card } from 'react-native-paper';
 import { MonoText } from '../components/StyledText'
 import { CustomPicker } from 'react-native-custom-picker'
-import { Card, CardTitle, CardContent, CardAction, CardButton, CardImage } from 'react-native-cards'
+import { CardTitle, CardContent } from 'react-native-cards'
 import ScrollableFlatList from '../components/ScrollableFlatList'
 import ImageCardListItem from '../components/ImageCardListItem'
 import API, { QUERY_TYPE } from '../api/API'
@@ -31,6 +30,7 @@ import HierarchySeparatorLine from '../components/HierarchySeparatorLine';
 import SelectedFiltersFlatList from '../components/SelectedFiltersFlatList';
 import TimeLineSlider from '../components/TimeLineSlider';
 import QueryData from '../dataclasses/QueryData';
+import InformationComponent from '../components/InformationComponent';
 
 // TODO: delete when we get sub categories from SPARQL DB
 const subCategoryTemporaryData = [
@@ -76,7 +76,8 @@ export default class HomeScreen extends React.Component {
       multiSliderValue: [DEFAULT_START_DATE, DEFAULT_END_DATE],
       showSlider: false,
       iconArrow: null,
-      screenWidth: Dimensions.get('window').width
+      screenWidth: Dimensions.get('window').width,
+      showInformation: true,
     }
   } // constructor
 
@@ -158,6 +159,10 @@ export default class HomeScreen extends React.Component {
     
     this._fetchImagesBasedOnProps()
   } // _toggleNegativity
+
+  _toggleInformation = () => {
+    this.setState(prevState=>({ showInformation: !prevState.showInformation}))
+  }
 
   // given to ScrollableFlatList as its onCategoryItemPress callback
   _onFlatListItemPress = (item) => {
@@ -428,11 +433,25 @@ export default class HomeScreen extends React.Component {
             keyExtractor={(item, index) => index.toString()}
           />
         )}
-        {(this.state.chosenImages.length===0)&& (
-          <View style={{flex:0.5, justifyContent: 'space-around', height: 300, maxHeight: 300, backgroundColor: 'white', margin: 5, elevation: 10, margin: 5, padding: 5}}>
-            <Text style={{fontSize: 20}}>Information</Text>
-            <Text>Search images by clicking/tapping the main categories on top. This will show the images that belong to the category. Selected filters will pop up on the most top row after searching and sub categories will be seen on bottom of the main categories (if there are any). Selected filters (which will be seen on top after searching) can be combined (by long pressing and after it, dragging) for new type of queries, or deleted if no longer needed. If the filter is clicked just once, it will make it 'negative' item.</Text>
-          </View>)}
+        
+        <View style={{flex:1}}>
+          {/*
+            <View style={{flex:0.5, justifyContent: 'space-around', height: 300, maxHeight: 300, backgroundColor: 'white', margin: 5, elevation: 10, margin: 5, padding: 5}}>
+              <Text style={{fontSize: 20}}>Information</Text>
+              <Text>Search images by clicking/tapping the main categories on top. This will show the images that belong to the category. Selected filters will pop up on the most top row after searching and sub categories will be seen on bottom of the main categories (if there are any). Selected filters (which will be seen on top after searching) can be combined (by long pressing and after it, dragging) for new type of queries, or deleted if no longer needed. If the filter is clicked just once, it will make it 'negative' item.</Text>
+            </View>
+          */}
+          <ScrollView style={{flex: 1}}>
+            <Card style={{margin: 5}}>
+              <Card.Actions>
+                <Button onPress={this._toggleInformation}>{(this.state.showInformation)? 'Hide' : 'How to use?'}</Button>
+              </Card.Actions>
+              {(this.state.chosenImages.length===0 && this.state.showInformation) && (
+                <InformationComponent toggleInformation={this._toggleInformation} />
+              )}
+            </Card>
+          </ScrollView>
+        </View>
       </SafeAreaView>
     ) // return
   } // render
