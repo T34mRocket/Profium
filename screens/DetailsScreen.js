@@ -26,7 +26,7 @@ export default class DetailsScreen extends React.Component {
     
     API.getImageDetails(rowData).then(imageDetails => { 
 
-      this.setState({  })
+      this.setState({   })
     })
   }
 
