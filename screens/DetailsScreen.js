@@ -3,6 +3,7 @@ import { ScrollView, StyleSheet, View, Image } from 'react-native'
 import { CardTitle, CardContent, CardAction, CardButton, CardImage } from 'react-native-cards'
 import { Button, Card, Title, Paragraph } from 'react-native-paper';
 import SelectedFiltersFlatList from '../components/SelectedFiltersFlatList';
+import API from '../api/API'
 
 export default class DetailsScreen extends React.Component {
   static navigationOptions = {
@@ -11,10 +12,22 @@ export default class DetailsScreen extends React.Component {
 
   constructor(props) {
     super(props)
-    this.state={
+
+
+    this.state = {
       width: null,
       height: null
     }
+    // this.obtainImageDetails()
+  }
+
+  obtainImageDetails = () => {
+
+    
+    API.getImageDetails(rowData).then(imageDetails => { 
+
+      this.setState({  })
+    })
   }
 
   componentWillMount() {
