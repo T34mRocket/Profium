@@ -13,20 +13,21 @@ export default class DetailsScreen extends React.Component {
   constructor(props) {
     super(props)
 
-
     this.state = {
       width: null,
-      height: null
+      height: null,
+      timeStamp: '',
+      tags: []
     }
-    // this.obtainImageDetails()
+
+    this._obtainImageDetails()
   }
 
-  obtainImageDetails = () => {
+  _obtainImageDetails = () => {
 
-    
-    API.getImageDetails(rowData).then(imageDetails => { 
+    API.getImageDetails(this.props.navigation.state.params.rawImageUrl).then(imageDetails => {  
 
-      this.setState({   })
+      this.setState({ timeStamp: imageDetails.timeStamp, tags: imageDetails.tags })
     })
   }
 
@@ -51,17 +52,12 @@ export default class DetailsScreen extends React.Component {
 
   render() {
 
-    const imageDetails = this.props.navigation.state.params.imageDetails
-
-    const timeStamp = imageDetails.timeStamp
-    const tagArray = imageDetails.tags
-
-    const tags  = tagArray.map(tag => {
+    const tags  = this.state.tags.map(tag => {
 
       return <CardContent text={tag} key={tag} />
     })
 
-    const descriptions = tagArray.map(tag => {
+    const descriptions = this.state.tags.map(tag => {
       
       return <CardContent text='Tag: ' key={tag} />
     })
@@ -100,7 +96,7 @@ export default class DetailsScreen extends React.Component {
               <CardTitle
                   subtitle={`Value`}
               />
-              <CardContent text={timeStamp} />
+              <CardContent text={this.state.timeStamp} />
               {tags}
             </View>
           </View>

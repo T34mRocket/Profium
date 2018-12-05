@@ -258,57 +258,6 @@ export default class HomeScreen extends React.Component {
       this._fetchImagesBasedOnProps()
   } // _onFilterDrag
 
-  // rowData is the unaltered imageUrl.
-  // NOTE: having to do this is bs of the highest order; there's probably a better way.
-  // the getImageDetails function is asynchronous, so there's no 'time' to pass its result to 
-  // navigate() unless I do it like this
-  _navigateWithDelay = (fullImageUrl, rowData, navigate) => {
-
-    API.getImageDetails(rowData).then(imageDetails => {
-
-      navigate('Details', { 
-        width: this.state.screenWidth, 
-        imageurl: fullImageUrl,
-        imageDetails: imageDetails
-        //data: this.state.andArrays,
-        //onDelete: this._onDeleteSearchItem,
-        //toggleNegativity: this._toggleNegativity,
-        //onFilterDrag: this._onFilterDrag,
-      })
-    })
-  } // _navigateWithDelay
-
-  // not used atm, because identicality has already been checked... preserved for now in case we need it
-  _checkIfIdenticalQueries = (draggedArrayIndex, indexOfDroppedOnArray, newAndArray) => {
-
-    let identicalQueries = false
-    let itemCount = newAndArray.length
-    let identicalItemCount = 0
-    this.state.andArrays.forEach((andArray, index) => {
-
-      // we won't compare to the old arrays that are already in the state, 
-      // since they are to be replaced / removed in any case
-      if (index !== draggedArrayIndex && index !== indexOfDroppedOnArray) {
-
-        andArray.forEach(queryData => {
-
-          newAndArray.forEach(queryData2 => {
- 
-            if (queryData.isEqualTo(queryData2)) {
-
-              identicalItemCount++
-            }
-          }) // inner forEach
-
-          if (identicalItemCount === itemCount) {
-            identicalQueries = true
-          }
-        }) // mid-forEach
-      } // index-if
-    }) // outer forEach
-    return identicalQueries
-  } // _checkIfIdenticalQueries
-
   _multiSliderValuesChange = values => {
     this.setState({
       multiSliderValue: values,
@@ -423,7 +372,15 @@ export default class HomeScreen extends React.Component {
               const fullImageUrl = API.fullImageDisplayUrl(rowData) // shown when opening the image details
               // console.log("rowData: " + rowData)
               return (
-                  <TouchableWithoutFeedback onPress={() => this._navigateWithDelay(fullImageUrl, rowData, navigate)}>
+                  <TouchableWithoutFeedback onPress={() => navigate('Details', { 
+                    width: this.state.screenWidth, 
+                    imageurl: fullImageUrl,
+                    rawImageUrl: rowData
+                    //data: this.state.andArrays,
+                    //onDelete: this._onDeleteSearchItem,
+                    //toggleNegativity: this._toggleNegativity,
+                    //onFilterDrag: this._onFilterDrag,
+                  })}>
                     <View style={styles.box2} >
                       <ImageCardListItem imageUrl={fullImageUrl}/>
                     </View>
