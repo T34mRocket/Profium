@@ -220,7 +220,7 @@ export default class HomeScreen extends React.Component {
   // but to force a re-render with each altering of HomeScreen state, it must be done
   _onDeleteSearchItem = (term, indexOfSubArray) => {
 
-    // console.log("deleteFunc term + index: " + term + ", " + indexOfSubArray)
+    // console.log("HomeScreen deleteFunc term + index: " + term + ", " + indexOfSubArray)
     const updatedSubArray = this.state.andArrays[indexOfSubArray].filter(queryItem => queryItem.term != term)
     // console.log("updatedSubArray length: " + updatedSubArray.length)
 
@@ -375,11 +375,11 @@ export default class HomeScreen extends React.Component {
                   <TouchableWithoutFeedback onPress={() => navigate('Details', { 
                     width: this.state.screenWidth, 
                     imageurl: fullImageUrl,
-                    rawImageUrl: rowData
-                    //data: this.state.andArrays,
-                    //onDelete: this._onDeleteSearchItem,
-                    //toggleNegativity: this._toggleNegativity,
-                    //onFilterDrag: this._onFilterDrag,
+                    rawImageUrl: rowData,
+                    queries: this.state.andArrays,
+                    onDelete: this._onDeleteSearchItem,
+                    toggleNegativity: this._toggleNegativity,
+                    onFilterDrag: this._onFilterDrag
                   })}>
                     <View style={styles.box2} >
                       <ImageCardListItem imageUrl={fullImageUrl}/>

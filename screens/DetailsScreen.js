@@ -64,15 +64,12 @@ export default class DetailsScreen extends React.Component {
 
     return (
     <View style={{flex:1}}>
-      {/*
-      // Show the filters also in Details view. This is not working properly yet
       <SelectedFiltersFlatList
-              data = {this.props.navigation.state.params.data}
-              onDelete = {this.props.navigation.state.params.onDelete}
-              toggleNegativity = {this.props.navigation.state.params.toggleNegativity}
-              onFilterDrag = {this.props.navigation.state.params.onFilterDrag}
+        data = {this.props.navigation.state.params.queries}
+        onDelete = {this.props.navigation.state.params.onDelete}
+        toggleNegativity = {this.props.navigation.state.params.toggleNegativity}
+        onFilterDrag = {this.props.navigation.state.params.onFilterDrag}
       />
-      */}
       <ScrollView style={styles.container}>
         <Card style={styles.card}>
           <Card.Cover style={{height:this.state.height}} source={{uri: this.props.navigation.state.params.imageurl}} />
