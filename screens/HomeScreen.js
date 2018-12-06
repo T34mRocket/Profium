@@ -17,7 +17,7 @@ import {
 } from 'react-native'
 import { WebBrowser } from 'expo'
 import GestureRecognizer, {swipeDirections} from 'react-native-swipe-gestures';
-import { Icon } from 'react-native-elements'
+import { Icon, SearchBar } from 'react-native-elements'
 import { Checkbox } from 'react-native-paper'
 import { Button, Card } from 'react-native-paper';
 import { MonoText } from '../components/StyledText'
@@ -57,7 +57,34 @@ const MAX_QUERIES = 5
 
 export default class HomeScreen extends React.Component {
   static navigationOptions = {
-    header: null,
+    header: ( /* Custom header */
+      <View
+        style={{
+          flexDirection: 'row',
+          backgroundColor: '#517fa4',
+          height: 80,
+          elevation: 10,
+          paddingTop: StatusBar.currentHeight,
+          overflow:'hidden' 
+        }}
+      >
+        <Image
+            style={{height:50, width:50, marginLeft:5}}
+            resizeMode={'contain'}
+            source={require('../assets/images/logoSRCH2.png')}
+        />
+        <Text style={{fontSize:30, alignSelf: 'center', marginLeft: 5, color:'white', fontFamily: 'monospace'}}>SRCH</Text>
+        <SearchBar
+          round
+          lightTheme
+          clearIcon={{ color: 'black' }}
+          //placeholderTextColor={'black'}
+          containerStyle={{backgroundColor: '#517fa4', flex:1, alignSelf: 'center', borderTopColor:'#517fa4', borderBottomColor:'#517fa4'}}
+          inputStyle={{backgroundColor: 'white'}}
+          placeholder='Search'
+          onChangeText={(item)=>{console.log(item)}} />
+      </View>
+    )
   }
 
   constructor(props) {
@@ -77,7 +104,7 @@ export default class HomeScreen extends React.Component {
       showSlider: false,
       iconArrow: null,
       screenWidth: Dimensions.get('window').width,
-      showInformation: true,
+      showInformation: false,
     }
   } // constructor
 
@@ -419,7 +446,6 @@ const styles = StyleSheet.create({
     flex: 1, 
     flexDirection: 'column', 
     justifyContent: 'flex-start', 
-    marginTop: StatusBar.currentHeight
   },
   column: {
     flex: 1,
