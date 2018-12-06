@@ -14,7 +14,7 @@ const HomeStack = createStackNavigator({
 })
 
 HomeStack.navigationOptions = {
-  tabBarLabel: 'Home',
+  /*tabBarLabel: 'Home',
   tabBarIcon: ({ focused }) => (
     <TabBarIcon
       focused = {focused}
@@ -24,7 +24,7 @@ HomeStack.navigationOptions = {
           : 'md-information-circle'
       }
     />
-  ),
+  ),*/
 }
 
 const HistoryStack = createStackNavigator({
@@ -55,8 +55,8 @@ SettingsStack.navigationOptions = {
   ),
 }
 
-export default createBottomTabNavigator({
+export default HomeStack/* createStackNavigator({
   HomeStack,
-  HistoryStack,
-  SettingsStack,
-})
+  //HistoryStack,
+  //SettingsStack,
+})*/
