@@ -73,7 +73,11 @@ export default class HomeScreen extends React.Component {
             resizeMode={'contain'}
             source={require('../assets/images/logoSRCH2.png')}
         />
-        <Text style={{fontSize:30, alignSelf: 'center', marginLeft: 5, color:'white', fontFamily: 'monospace'}}>SRCH</Text>
+        <Image
+            style={{height:50, width:70, marginLeft:5, alignSelf: 'center'}}
+            resizeMode={'contain'}
+            source={require('../assets/images/logoSRCH3.png')}
+        />
         <SearchBar
           round
           lightTheme
@@ -82,7 +86,10 @@ export default class HomeScreen extends React.Component {
           containerStyle={{backgroundColor: '#517fa4', flex:1, alignSelf: 'center', borderTopColor:'#517fa4', borderBottomColor:'#517fa4'}}
           inputStyle={{backgroundColor: 'white'}}
           placeholder='Search'
-          onChangeText={(item)=>{console.log(item)}} />
+          // call this if we want to have search that updates every time there are new letters in the search bar
+          onChangeText={(item)=>{console.log(item)}}
+          // called when enter/return is tapped on keyboard 
+          onSubmitEditing={(event)=>{console.log("typed: "+event.nativeEvent.text)}} />
       </View>
     )
   }
@@ -402,11 +409,11 @@ export default class HomeScreen extends React.Component {
                   <TouchableWithoutFeedback onPress={() => navigate('Details', { 
                     width: this.state.screenWidth, 
                     imageurl: fullImageUrl,
-                    rawImageUrl: rowData
-                    //data: this.state.andArrays,
-                    //onDelete: this._onDeleteSearchItem,
-                    //toggleNegativity: this._toggleNegativity,
-                    //onFilterDrag: this._onFilterDrag,
+                    rawImageUrl: rowData,
+                    data: this.state.andArrays,
+                    onDelete: this._onDeleteSearchItem,
+                    toggleNegativity: this._toggleNegativity,
+                    onFilterDrag: this._onFilterDrag,
                   })}>
                     <View style={styles.box2} >
                       <ImageCardListItem imageUrl={fullImageUrl}/>

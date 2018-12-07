@@ -8,6 +8,10 @@ import API from '../api/API'
 export default class DetailsScreen extends React.Component {
   static navigationOptions = {
     title: 'Details',
+    headerStyle: {
+      backgroundColor: '#517fa4',
+    },
+    headerTintColor: 'white'
   }
 
   constructor(props) {
@@ -17,7 +21,9 @@ export default class DetailsScreen extends React.Component {
       width: null,
       height: null,
       timeStamp: '',
-      tags: []
+      tags: [],
+      andArrays: this.props.navigation.state.params.data,
+
     }
 
     this._obtainImageDetails()
@@ -65,14 +71,14 @@ export default class DetailsScreen extends React.Component {
     return (
     <View style={{flex:1}}>
       {/*
-      // Show the filters also in Details view. This is not working properly yet
+        Show the filters also in Details view. This is not working properly yet
+      */}
       <SelectedFiltersFlatList
-              data = {this.props.navigation.state.params.data}
+              data = {this.state.andArrays}
               onDelete = {this.props.navigation.state.params.onDelete}
               toggleNegativity = {this.props.navigation.state.params.toggleNegativity}
               onFilterDrag = {this.props.navigation.state.params.onFilterDrag}
       />
-      */}
       <ScrollView style={styles.container}>
         <Card style={styles.card}>
           <Card.Cover style={{height:this.state.height}} source={{uri: this.props.navigation.state.params.imageurl}} />
