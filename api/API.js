@@ -242,7 +242,7 @@ export default API = {
       return this.query(config1).then(resultsSet => { return Array.from(resultsSet)} )
     } else {
 
-      console.log("there were negative query terms")
+      console.log("there were negative query terms ")
 
       let queryString2 = ''
 
