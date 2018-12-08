@@ -157,13 +157,13 @@ export default class HomeScreen extends React.Component {
       let endDate = searchByTime ? self.state.multiSliderValue[1].toString() : DEFAULT_END_DATE.toString() 
       endDate += '-12-31T23:59:59'
 
-      API.onChoosingPropsGetUrls(queryArray, startDate, endDate).then( resultsSet => {
+      API.onChoosingPropsGetUrls(queryArray, startDate, endDate).then( array => {
 
-        const arr = Array.from(resultsSet) // TODO: needs a check to see if it's a Set !
+        // const arr = Array.from(resultsSet) // TODO: needs a check to see if it's a Set !
         // console.log("array length: " + arr.length)
         // arr.forEach(item => console.log("item: " + item))
         self.setState({
-          chosenImages: arr
+          chosenImages: array
         })
        }) // then
     }, 10) // setTimeout
@@ -174,11 +174,21 @@ export default class HomeScreen extends React.Component {
 
     // NOTE: there might be a less convoluted way to do this, but rn I can't think of it
     let subArray = this.state.andArrays[subArrayIndex].slice()
+
+    subArray.forEach(queryData => {
+      console.log("isNegatives in toggleNeg before: " + queryData.isNegative)
+    })
+
     subArray.map(queryData => {
         if (queryData.term === term) {
         queryData.isNegative = !queryData.isNegative
+        return queryData
       }
     }) // map
+
+    subArray.forEach(queryData => {
+      console.log("isNegatives in toggleNeg after: " + queryData.isNegative)
+    })
     
     let tempAndArraysState = this.state.andArrays.slice() // copy the state... inefficient but whatever
     tempAndArraysState[subArrayIndex] = subArray

@@ -48,7 +48,7 @@ export default API = {
     OR: 'UNION'
   },
 
-  query: function(config, useUri) {
+  query: function(config) {
 
     // console.log("called query")
 
@@ -60,7 +60,7 @@ export default API = {
       },
       body: `${QUERY_START}${config.query}`
     }
-    // console.log("query body: " + options.body)
+    console.log("query body: " + options.body)
 
     // using await + async would be better, but it's easier to do this since it's familiar
     return fetch(request, options)
@@ -84,7 +84,7 @@ export default API = {
               
               // turn it into a switch if more return formats emerge... NOTE: always check what is actually returned from the server, 
               // before trying to work with the returned result!
-              if (useUri === true) {
+              if (config.useUri === true) {
                 
                 // console.log("in useUri block")
                 resultsSet.add(item.binding[0].uri[0])
@@ -106,10 +106,10 @@ export default API = {
   getTopLevelImageProps: function() {
     
     const config = {
-      query: GET_ALL_TOP_LVL_PROPS // fetch the top level category names
-      // this can have other properties as needed
+      query: GET_ALL_TOP_LVL_PROPS, // fetch the top level category names
+      useUri: false
     }
-    return this.query(config, false)
+    return this.query(config)
   }, // getTopLevelImageProps
 
   
@@ -126,9 +126,9 @@ export default API = {
     const tagsPromise = this._getImageTags(imageUrl).then(resultsSet2 => {
 
       const tags = Array.from(resultsSet2)
-       tags.forEach(item => {
-        // console.log("tag: " + item)
-      }) 
+      /* tags.forEach(item => {
+          console.log("tag: " + item)
+      }) */
       return tags
     })
 
@@ -144,9 +144,10 @@ export default API = {
     ?depic ${MOD_DATE} ?timestamp }`
 
     const config = {
-      query: query
+      query: query,
+      useUri: false
     }
-    return this.query(config, false)
+    return this.query(config)
   },
 
   _getImageTags: function(imageUrl) {
@@ -155,9 +156,10 @@ export default API = {
     ?depic ${DOC_SPECIFIER} ?tag }`
 
     const config = {
-      query: query
+      query: query,
+      useUri: false
     }
-    return this.query(config, false)
+    return this.query(config)
   },
 
   // queryArray is an array of arrays of AND-type searches (which contain QueryData objects).
@@ -179,46 +181,132 @@ export default API = {
 
     if (numOfOrTypeQueries === 1) {
 
-      queryString = `SELECT DISTINCT ?url WHERE { ?depic ${MOD_DATE} ?date . `
+      queryString = `SELECT DISTINCT ?url WHERE { `
     } else {
-      queryString = `SELECT DISTINCT ?url WHERE { { ?depic ${MOD_DATE} ?date . `
+      queryString = `SELECT DISTINCT ?url WHERE { `
     }
+
+    let negativeQueryTerms = []
 
     orTypeQueries.forEach( (andTypeInnerArray, arrIndex) => {
 
-      if (arrIndex !== 0 && arrIndex < numOfOrTypeQueries) {
-        queryString += ` } ${this.QUERY_TYPE.OR} { `
+      if (numOfOrTypeQueries > 1) {
+        queryString += '{ '
       }
 
       andTypeInnerArray.forEach( (queryData, index) => {
 
         if (queryData.isNegative) {
-          
+          /*
+
+          negativeQueryTerms.push(queryData.term)
+
+          // we need to select all images to filter them later... this is a special case when there's just one negative search term
+          if (numOfOrTypeQueries === 1) { 
+            queryString += `?depic ${DEPICTED_OBJ_INV} ?url`
+          } */
+
+          /*
           // NOTE: I'm only 80 % sure that this works correctly atm
           queryString += `?depic ${DOC_SPECIFIER} ?spec . ?depic ${DEPICTED_OBJ_INV} ?url . 
-          FILTER (?spec != '${queryData.term}')`
+          FILTER (?spec != '${queryData.term}')` */
         } else {
 
-          queryString += `?depic ${DOC_SPECIFIER} '${queryData.term}' 
+          queryString += `?depic ${MOD_DATE} ?date . ?depic ${DOC_SPECIFIER} '${queryData.term}' 
           . ?depic ${DEPICTED_OBJ_INV} ?url`
         }
-        if (index !== andTypeInnerArray.length-1) {
+        if (index < andTypeInnerArray.length-1) {
           queryString += ` ${this.QUERY_TYPE.AND} `
         }
-      }) // forEach
-      if (numOfOrTypeQueries > 1 && arrIndex !== 0) { 
+      }) // forEach and-type query
+
+      if (numOfOrTypeQueries > 1) { 
         
         queryString += ' }' 
       }
-    }) // forEach
+
+      if (arrIndex < numOfOrTypeQueries-1 && numOfOrTypeQueries > 1) {
+        queryString += ` ${this.QUERY_TYPE.OR} `
+      }
+    }) // forEach or-type query
     queryString += ` FILTER ( ?date >= '${startDate}'^^${DATE_FORMAT} %26%26 ?date <= '${endDate}'^^${DATE_FORMAT} ) } ${ORDER_BY_DATE_DESC}`
 
     // console.log("query: " + queryString)
-    const config = {
-      query: queryString
+    const config1 = {
+      query: queryString,
+      useUri: true
     }
-    return this.query(config, true)
+
+    if (negativeQueryTerms.length === 0) {
+
+      return this.query(config1).then(resultsSet => { return Array.from(resultsSet)} )
+    } else {
+
+      console.log("there were negative query terms")
+
+      let queryString2 = ''
+
+      const numOfNegTerms = negativeQueryTerms.length
+      if (numOfNegTerms === 1) {
+
+        queryString2 = `SELECT DISTINCT ?url WHERE { `
+      } else {
+        queryString2 = `SELECT DISTINCT ?url WHERE { { `
+      }
+
+      negativeQueryTerms.forEach( (term, index) => {
+
+        if (index!== 0 && index < numOfNegTerms) {
+          queryString2 += ` } ${this.QUERY_TYPE.OR} { `
+        }
+        queryString2 += `?depic ${DOC_SPECIFIER} '${term}' 
+        . ?depic ${DEPICTED_OBJ_INV} ?url`
+
+        if (index !== 0) { 
+      
+          queryString2 += ' }' 
+        }
+      }) // forEach
+      queryString2 += ' }'
+
+      const config2 = {
+        query: queryString2,
+        useUri: true
+      }
+
+      const negTermImagesPromise = this.query(config2).then(resultsSet => {
+
+        return Array.from(resultsSet)
+      })
+
+      const unFilteredImagesPromise = this.query(config1).then(resultsSet => {
+
+        return Array.from(resultsSet)
+      })
+
+      return Promise.all([unFilteredImagesPromise, negTermImagesPromise]).then(resultsarray => {
+
+        let unFilteredImages = resultsarray[0]
+        const negTermImages = resultsarray[1]
+
+        const filteredImages = unFilteredImages.filter(url => negTermImages.every(url2 => { return url2 !== url } ))
+        /* filteredImages.forEach(url => {
+          console.log("filtered image url: " + url)
+        }) */
+        return filteredImages
+      })
+    } // else
   }, // onChoosingPropsGetUrls
+
+  _getUnfilteredImages: function(config) {
+
+
+  },
+
+  _getNegativeTermImages: function() {
+
+
+  },
 
   smallImageDisplayUrl: function(imageUrl) {
   
