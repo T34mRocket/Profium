@@ -16,21 +16,21 @@ import {
   Dimensions
 } from 'react-native'
 import { WebBrowser } from 'expo'
-import GestureRecognizer, {swipeDirections} from 'react-native-swipe-gestures';
+import GestureRecognizer, {swipeDirections} from 'react-native-swipe-gestures'
 import { Icon, SearchBar } from 'react-native-elements'
 import { Checkbox } from 'react-native-paper'
-import { Button, Card } from 'react-native-paper';
+import { Button, Card } from 'react-native-paper'
 import { MonoText } from '../components/StyledText'
 import { CustomPicker } from 'react-native-custom-picker'
 import { CardTitle, CardContent } from 'react-native-cards'
 import ScrollableFlatList from '../components/ScrollableFlatList'
 import ImageCardListItem from '../components/ImageCardListItem'
 import API, { QUERY_TYPE } from '../api/API'
-import HierarchySeparatorLine from '../components/HierarchySeparatorLine';
-import SelectedFiltersFlatList from '../components/SelectedFiltersFlatList';
-import TimeLineSlider from '../components/TimeLineSlider';
-import QueryData from '../dataclasses/QueryData';
-import InformationComponent from '../components/InformationComponent';
+import HierarchySeparatorLine from '../components/HierarchySeparatorLine'
+import SelectedFiltersFlatList from '../components/SelectedFiltersFlatList'
+import TimeLineSlider from '../components/TimeLineSlider'
+import QueryData from '../dataclasses/QueryData'
+import InformationComponent from '../components/InformationComponent'
 
 // TODO: delete when we get sub categories from SPARQL DB
 const subCategoryTemporaryData = [
@@ -112,6 +112,10 @@ export default class HomeScreen extends React.Component {
       iconArrow: null,
       screenWidth: Dimensions.get('window').width,
       showInformation: false,
+      width: null,
+      height: null,
+      timeStamp: '',
+      tags: [],
     }
   } // constructor
 
@@ -310,6 +314,12 @@ export default class HomeScreen extends React.Component {
     }
   } // _closeOrOpenSubCategoryFlatList
 
+  // this is called from details screen
+  _setHomeScreenState = (state) => {
+    this.setState(state)
+    this._fetchImagesBasedOnProps()
+  }
+
   render() {
 
     // console.log("triggered HomeScreen render!")
@@ -355,7 +365,7 @@ export default class HomeScreen extends React.Component {
                     data = {this.state.subCategoryOptions}/>
           )
         }
-        {(this.state.chosenImages.length > 0) && (
+        {(this.state.andArrays.length > 0) && (
           <View style={styles.timeCheckboxAndCloseSubCategory}>
             <View style={styles.timeBox}>
               <Checkbox
@@ -389,10 +399,10 @@ export default class HomeScreen extends React.Component {
           </View>
         )}
         {/*</GestureRecognizer>*/}
-        {(this.state.showSlider) && 
+        {(this.state.showSlider && this.state.andArrays.length > 0) && 
           <TimeLineSlider selectedStartYear={this.state.multiSliderValue[0]} selectedEndYear={this.state.multiSliderValue[1]} multiSliderValuesChange={this._multiSliderValuesChange} />
         }
-        {(this.state.chosenImages.length > 0) && (
+        {(this.state.andArrays.length > 0 && this.state.chosenImages.length > 0) && (
           <FlatList 
             style = { styles.imagesFlatList }
             vertical            
@@ -410,10 +420,8 @@ export default class HomeScreen extends React.Component {
                     width: this.state.screenWidth, 
                     imageurl: fullImageUrl,
                     rawImageUrl: rowData,
-                    data: this.state.andArrays,
-                    onDelete: this._onDeleteSearchItem,
-                    toggleNegativity: this._toggleNegativity,
-                    onFilterDrag: this._onFilterDrag,
+                    state: this.state,
+                    setHomescreenState: this._setHomeScreenState
                   })}>
                     <View style={styles.box2} >
                       <ImageCardListItem imageUrl={fullImageUrl}/>
@@ -432,16 +440,18 @@ export default class HomeScreen extends React.Component {
               <Text>Search images by clicking/tapping the main categories on top. This will show the images that belong to the category. Selected filters will pop up on the most top row after searching and sub categories will be seen on bottom of the main categories (if there are any). Selected filters (which will be seen on top after searching) can be combined (by long pressing and after it, dragging) for new type of queries, or deleted if no longer needed. If the filter is clicked just once, it will make it 'negative' item.</Text>
             </View>
           */}
+          {(this.state.andArrays.length === 0) && (
           <ScrollView style={{flex: 1}}>
-            <Card style={{margin: 5}}>
+            <Card style={{marginTop:0, marginLeft: 5, marginRight: 5, marginBottom: 5}}>
               <Card.Actions>
                 <Button onPress={this._toggleInformation}>{(this.state.showInformation)? 'Hide' : 'How to use?'}</Button>
               </Card.Actions>
-              {(this.state.chosenImages.length===0 && this.state.showInformation) && (
+              {(this.state.showInformation) && (
                 <InformationComponent toggleInformation={this._toggleInformation} />
               )}
             </Card>
           </ScrollView>
+          )}
         </View>
       </SafeAreaView>
     ) // return

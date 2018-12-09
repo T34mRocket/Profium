@@ -1,30 +1,41 @@
 import React from 'react'
-import { ScrollView, StyleSheet, View, Image } from 'react-native'
+import { ScrollView, StyleSheet, View, Image, BackHandler, TouchableOpacity, Text } from 'react-native'
 import { CardTitle, CardContent, CardAction, CardButton, CardImage } from 'react-native-cards'
-import { Button, Card, Title, Paragraph } from 'react-native-paper';
-import SelectedFiltersFlatList from '../components/SelectedFiltersFlatList';
+import { Button, Card, Title, Paragraph } from 'react-native-paper'
+import { HeaderBackButton } from 'react-navigation'
+import { Icon, colors } from 'react-native-elements'
+import SelectedFiltersFlatList from '../components/SelectedFiltersFlatList'
 import API from '../api/API'
+import HomeScreen from './HomeScreen'
+import QueryData from '../dataclasses/QueryData';
 
 export default class DetailsScreen extends React.Component {
-  static navigationOptions = {
-    title: 'Details',
-    headerStyle: {
-      backgroundColor: '#517fa4',
-    },
-    headerTintColor: 'white'
-  }
+
+  static navigationOptions = ({navigation}) => ({
+    
+      title: 'Details',
+      headerLeft: ( <HeaderBackButton tintColor={'white'} onPress={ () => { 
+        navigation.state.params.onBackPress()
+      } }  /> ),
+      headerStyle: {
+        backgroundColor: '#517fa4',
+      },
+      headerTintColor: 'white',
+  })
 
   constructor(props) {
     super(props)
 
-    this.state = {
+    this.handleBackButtonClick = this.handleBackButtonClick.bind(this);
+
+    this.state = this.props.navigation.state.params.state /*{
       width: null,
       height: null,
       timeStamp: '',
       tags: [],
       andArrays: this.props.navigation.state.params.data,
 
-    }
+    }*/
 
     this._obtainImageDetails()
   }
@@ -37,7 +48,78 @@ export default class DetailsScreen extends React.Component {
     })
   }
 
+  _toggleNegativity = (term, subArrayIndex) => {
+
+    // NOTE: there might be a less convoluted way to do this, but rn I can't think of it
+    let subArray = this.state.andArrays[subArrayIndex].slice()
+    subArray.map(queryData => {
+        if (queryData.term === term) {
+        queryData.isNegative = !queryData.isNegative
+      }
+    }) // map
+    
+    let tempAndArraysState = this.state.andArrays.slice() // copy the state... inefficient but whatever
+    tempAndArraysState[subArrayIndex] = subArray
+    this.setState({ andArrays: tempAndArraysState })
+
+  } // _toggleNegativity
+
+  _onDeleteSearchItem = (term, indexOfSubArray) => {
+
+    const updatedSubArray = this.state.andArrays[indexOfSubArray].filter(queryItem => queryItem.term != term)
+
+    if (updatedSubArray.length > 0) {
+      
+      let tempAndArraysState = this.state.andArrays.slice() // copy the state... inefficient but whatever
+      tempAndArraysState[indexOfSubArray] = updatedSubArray
+      this.setState({ andArrays: tempAndArraysState })
+    } else {
+
+      let tempAndArraysState2 = this.state.andArrays.slice()
+      tempAndArraysState2.splice(indexOfSubArray, 1)  // remove the subArray
+
+      this.setState({ andArrays: tempAndArraysState2 })
+    }
+
+  } // _onDeleteSearchItem
+
+  // called when dropping a visual search item on another in the top pen
+  _onFilterDrag = (from, to, andArray) => {
+
+    if (from === to) return
+
+    let tempAndArraysState = this.state.andArrays.slice()
+    tempAndArraysState[to] = andArray
+    tempAndArraysState.splice(from, 1)
+    this.setState({ andArrays: tempAndArraysState })
+
+  } // _onFilterDrag
+
+  _onTagPress = (item) => {
+
+    let oneItemSubArrayContainsItem = false
+    this.state.andArrays.forEach(andArray => {
+
+      if (andArray.length === 1) {
+
+        if(andArray[0].term === item) {
+          oneItemSubArrayContainsItem = true
+        }
+      }
+    })
+    // you can't add more than one 'orphan' search term; e.g. 'dog' OR 'dog' OR 'dog'.
+    // combining terms with other terms twice or more is fine though;
+    // e.g. 'dog AND alive' OR 'dog AND red'
+    if(oneItemSubArrayContainsItem || this.state.andArrays.length > HomeScreen.MAX_QUERIES) return
+
+    this.setState(prevState => ({
+      andArrays: [[new QueryData(item, false)], ...prevState.andArrays] // queries are positive by default
+    }))
+
+  } // _onTagPress
+
   componentWillMount() {
+      BackHandler.addEventListener('hardwareBackPress', this.handleBackButtonClick);
       // resize image based on the passed parameters (width or height)
       Image.getSize(this.props.navigation.state.params.imageurl, (width, height) => {
           if (this.props.navigation.state.params.width && !this.props.navigation.state.params.height) {
@@ -56,11 +138,46 @@ export default class DetailsScreen extends React.Component {
       });
   }
 
+  componentWillUnmount() {
+    BackHandler.removeEventListener('hardwareBackPress', this.handleBackButtonClick);
+  }
+
+  componentDidMount() {
+    this.props.navigation.setParams({
+      onBackPress: this.handleBackButtonClick
+    })
+  }
+
+  // when navigating back, set home screen state as the same as details screen's current state ->
+  // this is because we don't have time to implement state management (MobX or Redux)  
+  // at this point anymore
+  handleBackButtonClick() {
+    this.props.navigation.state.params.setHomescreenState(this.state)
+    this.props.navigation.goBack(null);
+    
+    return true;
+  }
+
   render() {
 
     const tags  = this.state.tags.map(tag => {
 
-      return <CardContent text={tag} key={tag} />
+      return <Card.Actions style={{margin:0, padding: 0, paddingLeft:8, alignSelf:'flex-start'}} key={tag}>
+                <Button onPress={() => {this._onTagPress(tag)}}>{tag}</Button>
+             </Card.Actions>
+      
+            //<CardContent text={tag} key={tag} />
+
+            // Todo: For some reason this code does not render like the top one??
+            // Use this if we want to show the buttons like the scrollable items in main screen
+            /*(<TouchableOpacity
+                    style={styles.button}
+                    onPress={() => {this._onTagPress(tag)}}
+                    delayPressIn={ 50 }
+                    key={tag}
+                  >
+                    <Text key={tag}>{tag}</Text>
+            </TouchableOpacity>)*/
     })
 
     const descriptions = this.state.tags.map(tag => {
@@ -70,26 +187,18 @@ export default class DetailsScreen extends React.Component {
 
     return (
     <View style={{flex:1}}>
-      {/*
-        Show the filters also in Details view. This is not working properly yet
-      */}
       <SelectedFiltersFlatList
               data = {this.state.andArrays}
-              onDelete = {this.props.navigation.state.params.onDelete}
-              toggleNegativity = {this.props.navigation.state.params.toggleNegativity}
-              onFilterDrag = {this.props.navigation.state.params.onFilterDrag}
+              onDelete = {this._onDeleteSearchItem}
+              toggleNegativity = {this._toggleNegativity}
+              onFilterDrag = {this._onFilterDrag}
       />
       <ScrollView style={styles.container}>
         <Card style={styles.card}>
           <Card.Cover style={{height:this.state.height}} source={{uri: this.props.navigation.state.params.imageurl}} />
-          <Card.Actions>
-            <Button>Cancel</Button>
-            <Button>Ok</Button>
-          </Card.Actions>
-          
           <Card.Content>
-            <Title>Card title</Title>
-            <Paragraph>Card content</Paragraph>
+            {/*<Title>Card title</Title>
+            <Paragraph>Card content</Paragraph>*/}
             <View style={styles.row}>
             <View style={styles.box1}>
               <CardTitle
@@ -141,11 +250,13 @@ const styles = StyleSheet.create({
     shadowRadius: 1, //IOS,
     borderRadius: 5,
     backgroundColor: '#fff',
-    elevation: 2, // Android
-    maxHeight: 54,
+    elevation: 4, // Android
+    height: 36,
     justifyContent: 'center',
     alignItems: 'center',
-    margin: 5,
+    marginLeft: 5,
+    marginRight:5,
+    marginBottom:8,
     padding: 5
   },
   image:{
