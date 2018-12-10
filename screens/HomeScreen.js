@@ -54,6 +54,7 @@ const DEFAULT_END_DATE = (new Date()).getFullYear()
 
 // max number of search terms that can be present in the top pen
 const MAX_QUERIES = 4
+const MAX_AND_QUERIES = 3
 
 export default class HomeScreen extends React.Component {
   static navigationOptions = ({ navigation }) => ({
@@ -311,12 +312,15 @@ export default class HomeScreen extends React.Component {
 
     if (from === to) return
 
-      let tempAndArraysState = this.state.andArrays.slice()
-      tempAndArraysState[to] = andArray
-      tempAndArraysState.splice(from, 1)
-      this.setState({ andArrays: tempAndArraysState })
+    // the ui can only accommodate a limited number of AND-type queries
+    if (this.state.andArrays[to].length >= MAX_AND_QUERIES) return
 
-      this._fetchImagesBasedOnProps()
+    let tempAndArraysState = this.state.andArrays.slice()
+    tempAndArraysState[to] = andArray
+    tempAndArraysState.splice(from, 1)
+    this.setState({ andArrays: tempAndArraysState })
+
+    this._fetchImagesBasedOnProps()
   } // _onFilterDrag
 
   _multiSliderValuesChange = values => {

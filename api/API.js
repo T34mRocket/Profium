@@ -162,204 +162,70 @@ export default API = {
     return this.query(config)
   },
 
-  // queryArray is an array of arrays of AND-type searches (which contain QueryData objects).
+  // orTypeQueries is an array of arrays of AND-type searches (which contain QueryData objects).
   // startDate and endDate are properties in HomeScreen's state (set by moving the slider)
-  onChoosingPropsGetUrls: function(queryArray, startDate, endDate) {
+  onChoosingPropsGetUrls: function(orTypeQueries, startDate, endDate) {
 
-    /* // example of a queryArray; not meant to be used anywhere!
-    const orTypeQueries = [
+    /* // example of a query array; not meant to be used anywhere!
+      orTypeQueries = [
       [ QueryData(term='dog'), QueryData(term='alive'), QueryData(term='yellow') ], 
       [ QueryData(term='cat') ], 
       [ QueryData(term='goose'), QueryData(term='white') ]
     ]
     */
 
-    const orTypeQueries = queryArray
+    let queryString = ''
+
     const numOfOrTypeQueries = orTypeQueries.length
 
-    let containsNegativeQueries = false
+    if (numOfOrTypeQueries === 1) {
 
-    orTypeQueries.forEach( andTypeInnerArray => {
+      queryString = `SELECT DISTINCT ?url WHERE { `
+    } else {
+      queryString = `SELECT DISTINCT ?url WHERE { { `
+    }
 
-      andTypeInnerArray.forEach( queryData => {
+    orTypeQueries.forEach( (andTypeInnerArray, arrIndex) => {
+
+      if (arrIndex !== 0 && arrIndex < numOfOrTypeQueries) {
+        queryString += ` } ${this.QUERY_TYPE.OR} { `
+      }
+
+      andTypeInnerArray.forEach( (queryData, index) => {
+
         if (queryData.isNegative) {
-          containsNegativeQueries = true
-          return
-        }
-      })
-    })
-  
-    // due to the wonky way in which the negative queries work,
-    // we need different blocks for query arrays that contain negative queries
-    if (containsNegativeQueries) {
-
-      let resultImages = []
-
-      const promises = orTypeQueries.map( andTypeInnerArray => {
-        
-        let negQueries = []
-        let posQueries = []
-
-        andTypeInnerArray.forEach( queryData => {
-
-          if (queryData.isNegative) { 
-
-            negQueries.push(queryData.term)
-          } else {
-            posQueries.push(queryData.term)
-          }
-        })
-
-        let negQueryString = 'SELECT DISTINCT ?url WHERE { '
-        let posQueryString = 'SELECT DISTINCT ?url WHERE { '
-
-        negQueries.forEach( (term, index) => {
-
-          if (negQueries.length > 1) {
-            negQueryString += '{ '
-          }
-
-          negQueryString += `?depic ${MOD_DATE} ?date . ?depic ${DOC_SPECIFIER} '${term}' 
-          . ?depic ${DEPICTED_OBJ_INV} ?url`
-
-          if (negQueries.length > 1) {
-            negQueryString += ' }'
-
-            if (index < negQueries.length-1) {
-              negQueryString += ` ${this.QUERY_TYPE.OR} { ` // don't even ask why they're OR-type queries here...
-            }
-          }
-
-          if (index === negQueries.length-1) {
-            negQueryString += ` } FILTER ( ?date >= '${startDate}'^^${DATE_FORMAT} %26%26 ?date <= '${endDate}'^^${DATE_FORMAT} ) } ${ORDER_BY_DATE_DESC}`
-          }
-        })
-
-        if (posQueries.length === 0) { // special case... we still need something to compare against, even with no positive queries
-
-          posQueryString += `?depic ${MOD_DATE} ?date . ?depic ${DOC_SPECIFIER} ?any 
-          . ?depic ${DEPICTED_OBJ_INV} ?url } FILTER ( ?date >= '${startDate}'^^${DATE_FORMAT} %26%26 ?date <= '${endDate}'^^${DATE_FORMAT} ) } ${ORDER_BY_DATE_DESC}`
+          
+          // '!' = '%21' in the weird encoding that this stuff uses
+          queryString += `?depic ${MOD_DATE} ?date . ?depic ${DEPICTED_OBJ_INV} ?url . 
+          OPTIONAL { ?depic ${DOC_SPECIFIER} ?tag . FILTER (?tag = '${queryData.term}') } . FILTER ( %21bound(?tag) )`
         } else {
 
-          posQueries.forEach( (term, index) => {
-
-            if (posQueries.length > 1) {
-              posQueryString += '{ '
-            }
-  
-            posQueryString += `?depic ${MOD_DATE} ?date . ?depic ${DOC_SPECIFIER} '${term}' 
-            . ?depic ${DEPICTED_OBJ_INV} ?url`
-  
-            if (posQueries.length > 1) {
-              posQueryString += ' }'
-  
-              if (index < posQueries.length-1) {
-                posQueryString += ` ${this.QUERY_TYPE.AND} { `
-              }
-            }
-  
-            if (index === posQueries.length-1) {
-              posQueryString += ` } FILTER ( ?date >= '${startDate}'^^${DATE_FORMAT} %26%26 ?date <= '${endDate}'^^${DATE_FORMAT} ) } ${ORDER_BY_DATE_DESC}`
-            }
-          }) // posQueries forEach
-        } // else if there's more than one positive query
-
-        const negConfig = {
-          query: negQueryString,
-          useUri: true
-        }
-
-        const negPromise = this.query(negConfig).then(resultsSet => {
-
-          return Array.from(resultsSet)
-        })
-
-        const posConfig = {
-          query: posQueryString,
-          useUri: true
-        }
-
-        const posPromise = this.query(posConfig).then(resultsSet => {
-
-          return Array.from(resultsSet)
-        })
-
-        return Promise.all([negPromise, posPromise]).then(resultsArray => {
-
-          const negImages = resultsArray[0]
-          const posImages = resultsArray[1]
-
-          // filter out the negative image urls from the positive results
-          for (let i = posImages.length-1; i >= 0; i--) {
-            for (let j = negImages.length-1; j >= 0; j--) {
-              if (posImages[i] === negImages[j]) {
-                posImages.pop()
-                // negImages.splice(j, 1) // they can be removed since all images in both arrays are unique
-              }
-            }
-          }
-          // console.log("filtered andImages: ")
-          // posImages.forEach(url => console.log("pos url: " + url))
-          return posImages
-        }) // Promise.all
-      }) // const promises
-
-      // the final, actual function return from the negative query logic... jesus christ on a pogo stick :D
-      return Promise.all(promises).then(images => {
-
-        // the returned object is some kind of huge concatenated string monster... wtf is up here is anyone's guess.
-        // this is more inefficient than splitting atoms with a camp fire
-        const splitImages = images[0].toString().trim().split(',')
-        // console.log("num of unfiltered images: " + splitImages.length)
-        const filteredImages = this.removeDuplicates(splitImages)
-        // console.log("num of filtered images: " + filteredImages.length)
-        // console.log("zeroeth img url: " + typeof filteredImages[0])
-
-        // something is putting zero-length strings into the array at some point somehow...
-        const newArray = filteredImages.filter(url => url.length > 0 ) 
-
-        // console.log("length of filtered array: " + newArray.length)
-        return newArray
-      })
-    } else { // the andArrays contain only positive type of queries
-
-      let queryString = `SELECT DISTINCT ?url WHERE { `
-    
-      orTypeQueries.forEach( (andTypeInnerArray, arrIndex) => {
-  
-        if (numOfOrTypeQueries > 1) {
-          queryString += '{ '
-        }
-  
-        andTypeInnerArray.forEach( (queryData, index) => {
-  
           queryString += `?depic ${MOD_DATE} ?date . ?depic ${DOC_SPECIFIER} '${queryData.term}' 
           . ?depic ${DEPICTED_OBJ_INV} ?url`
-          
-          if (index < andTypeInnerArray.length-1) {
-            queryString += ` ${this.QUERY_TYPE.AND} `
-          }
-        }) // forEach and-type query
-  
-        if (numOfOrTypeQueries > 1) { 
-          
-          queryString += ' }' 
         }
-  
-        if (arrIndex < numOfOrTypeQueries-1 && numOfOrTypeQueries > 1) {
-          queryString += ` ${this.QUERY_TYPE.OR} `
+        if (index !== andTypeInnerArray.length-1) {
+          queryString += ` ${this.QUERY_TYPE.AND} `
         }
-      }) // forEach or-type query
-      queryString += ` FILTER ( ?date >= '${startDate}'^^${DATE_FORMAT} %26%26 ?date <= '${endDate}'^^${DATE_FORMAT} ) } ${ORDER_BY_DATE_DESC}`
-  
-      // console.log("pos. query: " + queryString)
-      const config2 = {
-        query: queryString,
-        useUri: true
+      }) // forEach
+      if (numOfOrTypeQueries > 1 && arrIndex !== 0) { 
+        
+        queryString += ' }' 
       }
-      
-      return this.query(config2).then(resultsSet => { return Array.from(resultsSet)} )
-    } // positive queries only else
+    }) // forEach
+    queryString += ` FILTER ( ?date >= '${startDate}'^^${DATE_FORMAT} %26%26 ?date <= '${endDate}'^^${DATE_FORMAT} ) } ${ORDER_BY_DATE_DESC}`
+
+    // console.log("query: " + queryString)
+    const config = {
+      query: queryString,
+      useUri: true
+    }
+    return this.query(config).then(resultsSet => {
+
+      // we need a regExp to filter out the one .docx file that's returned with the images for some reason...
+      // const arr = Array.from(resultsSet).filter(url => url.length > 0) // not working as it is a proper url
+      // arr.forEach(url => console.log(url))
+      return Array.from(resultsSet)
+    })
   }, // onChoosingPropsGetUrls
 
   smallImageDisplayUrl: function(imageUrl) {
