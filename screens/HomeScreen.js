@@ -177,13 +177,15 @@ export default class HomeScreen extends React.Component {
   // NOTE: almost identical to _flatListItemPress. we're running out of time 
   // to maintain good code structure
   _addTypedQuery = (typedString) => {
+
     typedString = typedString.toLowerCase()
+
     let oneItemSubArrayContainsItem = false
     this.state.andArrays.forEach(andArray => {
 
       if (andArray.length === 1) {
 
-        if(andArray[0].term === item) {
+        if(andArray[0].term === typedString) {
           oneItemSubArrayContainsItem = true
         }
       }
