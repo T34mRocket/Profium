@@ -57,6 +57,6 @@ SettingsStack.navigationOptions = {
 
 export default HomeStack/* createStackNavigator({
   HomeStack,
-  //HistoryStack,
-  //SettingsStack,
+  HistoryStack,
+  SettingsStack,
 })*/
