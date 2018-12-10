@@ -188,17 +188,10 @@ export default class DetailsScreen extends React.Component {
     return (
     <View style={{flex:1}}>
       <SelectedFiltersFlatList
-<<<<<<< HEAD
-        data = {this.props.navigation.state.params.queries}
-        onDelete = {this.props.navigation.state.params.onDelete}
-        toggleNegativity = {this.props.navigation.state.params.toggleNegativity}
-        onFilterDrag = {this.props.navigation.state.params.onFilterDrag}
-=======
               data = {this.state.andArrays}
               onDelete = {this._onDeleteSearchItem}
               toggleNegativity = {this._toggleNegativity}
               onFilterDrag = {this._onFilterDrag}
->>>>>>> 9394f071d827f131e1bbb79f70a52489f3c2c895
       />
       <ScrollView style={styles.container}>
         <Card style={styles.card}>

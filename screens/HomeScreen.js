@@ -53,7 +53,7 @@ const DEFAULT_START_DATE = 1960
 const DEFAULT_END_DATE = (new Date()).getFullYear()
 
 // max number of search terms that can be present in the top pen
-const MAX_QUERIES = 5
+const MAX_QUERIES = 4
 
 export default class HomeScreen extends React.Component {
   static navigationOptions = {
@@ -232,7 +232,7 @@ export default class HomeScreen extends React.Component {
     // you can't add more than one 'orphan' search term; e.g. 'dog' OR 'dog' OR 'dog'.
     // combining terms with other terms twice or more is fine though;
     // e.g. 'dog AND alive' OR 'dog AND red'
-    if(oneItemSubArrayContainsItem || this.state.andArrays.length > MAX_QUERIES) return
+    if(oneItemSubArrayContainsItem || this.state.andArrays.length >= MAX_QUERIES) return
 
     this.setState(prevState => ({
       andArrays: [[new QueryData(item, false)], ...prevState.andArrays] // queries are positive by default
