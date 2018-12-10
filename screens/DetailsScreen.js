@@ -110,7 +110,7 @@ export default class DetailsScreen extends React.Component {
     // you can't add more than one 'orphan' search term; e.g. 'dog' OR 'dog' OR 'dog'.
     // combining terms with other terms twice or more is fine though;
     // e.g. 'dog AND alive' OR 'dog AND red'
-    if(oneItemSubArrayContainsItem || this.state.andArrays.length > HomeScreen.MAX_QUERIES) return
+    if(oneItemSubArrayContainsItem || this.state.andArrays.length >= HomeScreen.MAX_QUERIES) return
 
     this.setState(prevState => ({
       andArrays: [[new QueryData(item, false)], ...prevState.andArrays] // queries are positive by default

@@ -56,7 +56,7 @@ const DEFAULT_END_DATE = (new Date()).getFullYear()
 const MAX_QUERIES = 4
 
 export default class HomeScreen extends React.Component {
-  static navigationOptions = {
+  static navigationOptions = ({ navigation }) => ({
     header: ( /* Custom header */
       <View
         style={{
@@ -87,12 +87,12 @@ export default class HomeScreen extends React.Component {
           inputStyle={{backgroundColor: 'white'}}
           placeholder='Search'
           // call this if we want to have search that updates every time there are new letters in the search bar
-          onChangeText={(item)=>{console.log(item)}}
+          onChangeText={(item)=>{ /* console.log(item) */}}
           // called when enter/return is tapped on keyboard 
-          onSubmitEditing={(event)=>{console.log("typed: "+event.nativeEvent.text)}} />
+          onSubmitEditing={(event) => {navigation.state.params.addTypedQuery(event.nativeEvent.text)}} />
       </View>
-    )
-  }
+    ) // header
+  }) // navigationOptions
 
   constructor(props) {
     super(props)
@@ -120,6 +120,10 @@ export default class HomeScreen extends React.Component {
   } // constructor
 
   componentDidMount = () => {
+
+    this.props.navigation.setParams({
+      addTypedQuery: this._addTypedQuery
+    })
 
     // I'm not sure why tf it needs such an elaborate check, but it doesn't work without it
     if (typeof this.state.topLevelProps === undefined || this.state.topLevelProps.length <= 0) {
@@ -179,6 +183,33 @@ export default class HomeScreen extends React.Component {
        }) // then
     }, 10) // setTimeout
   } // _fetchImagesBasedOnProps
+
+  // called when hitting 'enter' after typing in the search bar
+  // NOTE: almost identical to _flatListItemPress. we're running out of time 
+  // to maintain good code structure
+  _addTypedQuery = (typedString) => {
+
+    let oneItemSubArrayContainsItem = false
+    this.state.andArrays.forEach(andArray => {
+
+      if (andArray.length === 1) {
+
+        if(andArray[0].term === item) {
+          oneItemSubArrayContainsItem = true
+        }
+      }
+    })
+    // you can't add more than one 'orphan' search term; e.g. 'dog' OR 'dog' OR 'dog'.
+    // combining terms with other terms twice or more is fine though;
+    // e.g. 'dog AND alive' OR 'dog AND red'
+    if(oneItemSubArrayContainsItem || this.state.andArrays.length >= MAX_QUERIES) return
+
+    console.log("typed: " + typedString)
+    this.setState(prevState => ({
+      andArrays: [[new QueryData(typedString, false)], ...prevState.andArrays] // queries are positive by default
+    }))
+    this._fetchImagesBasedOnProps()
+  } // _addTypedQuery
 
   // passed all the way down to individual SearchItem components
   _toggleNegativity = (term, subArrayIndex) => {
@@ -295,8 +326,6 @@ export default class HomeScreen extends React.Component {
       // console.log("draggedFromIndex: " + from)
       // console.log("draggedToIndex: " + to)
       // console.log("new combined andArray: " + andArray)
-
-      // TODO: the visual ui elements are not combined correctly (only one item remains after combination)
 
       let tempAndArraysState = this.state.andArrays.slice()
       tempAndArraysState[to] = andArray
