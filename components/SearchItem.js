@@ -20,13 +20,10 @@ export default class SearchItem extends React.Component {
   // passed down all the way from HomeScreen
   _toggleNegativity = () => {
 
-    // console.log("called toggleNegativity")
     this.props.toggleNegativity(this.props.queryData.term, this.props.containerArrayIndex)
   }
 
   render() {
-
-    console.log("term within SearchItem render: " + this.props.queryData.term)
 
     if(this.props.allSearchItemsInAndArray.length<2){
       return (
@@ -43,12 +40,12 @@ export default class SearchItem extends React.Component {
           onPressOut={this.props.moveEnd}
           onPress={()=>{this._toggleNegativity()}}
         >
-            <Text style={{ 
-              color: 'black',
-              paddingLeft:5,
-              paddingRight:5,
-            }}>{this.props.queryData.term}</Text>
-            <Icon name='close' type='AntDesign' style={{ paddingLeft:15, paddingRight:15, margin:5 }} onPress={() => {this._onDeleteItem()}}></Icon>
+          <Text style={{ 
+            color: 'black',
+            paddingLeft:5,
+            paddingRight:5,
+          }}>{this.props.queryData.term}</Text>
+          <Icon name='close' type='AntDesign' style={styles.icon} onPress={() => {this._onDeleteItem()}}></Icon>
         </TouchableOpacity>
       )
     } // if(termArray.length<2)
@@ -81,7 +78,7 @@ export default class SearchItem extends React.Component {
               key={item.term}>{item.term}</Text>
             )
           })}
-          <Icon name='close' type='AntDesign' style={{ paddingLeft:15, paddingRight:15, margin:5 }} onPress={() => {this._onDeleteItem()}}></Icon>
+          <Icon name='close' type='AntDesign' style={styles.icon} onPress={() => {this._onDeleteItem()}}></Icon>
         </TouchableOpacity>
       )
     } // else
@@ -91,9 +88,9 @@ export default class SearchItem extends React.Component {
 } // SearchItem
 
 const styles = StyleSheet.create({
-
-  chip: {
-    backgroundColor: '#fff',
-    margin: 4,
+  icon: {
+    paddingLeft:15, 
+    paddingRight:15, 
+    margin:5
   },
 })

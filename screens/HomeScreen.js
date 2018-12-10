@@ -124,10 +124,8 @@ export default class HomeScreen extends React.Component {
     // I'm not sure why tf it needs such an elaborate check, but it doesn't work without it
     if (typeof this.state.topLevelProps === undefined || this.state.topLevelProps.length <= 0) {
 
-      // console.log("getting topLevelProps")
       API.getTopLevelImageProps().then( resultsSet => {
       
-        // console.log("resultsSet: " + resultsSet)
         this.setState({
           topLevelProps: Array.from(resultsSet)
         })
@@ -144,14 +142,6 @@ export default class HomeScreen extends React.Component {
     setTimeout(function() {
       
       const queryArray = self.state.andArrays
-
-      // console.log("subArray items: ")
-      /* queryArray.forEach(andArray => {
-
-        andArray.forEach(item => {
-          console.log("item: " + item.toString())
-        })
-      }) */
 
       if (queryArray.length === 0) {
 
@@ -171,8 +161,7 @@ export default class HomeScreen extends React.Component {
       API.onChoosingPropsGetUrls(queryArray, startDate, endDate).then( array => {
 
         // const arr = Array.from(resultsSet) // TODO: needs a check to see if it's a Set !
-        // console.log("array length: " + arr.length)
-        // arr.forEach(item => console.log("item: " + item))
+
         self.setState({
           chosenImages: array
         })
@@ -239,11 +228,10 @@ export default class HomeScreen extends React.Component {
     }))
     this._fetchImagesBasedOnProps()
     
-    // console.log("selected "+item)
     this.setState({clickedCategoryItem: item})
 
     // just for testing that when pressing category from Main FlatList, the sub FlatList will "live" reload 
-    // TODO: delete when this is no longer needed
+    // TODO: delete when this is no longer needed and there are subcategories in the database
     switch(item) {
       case "tekninen kuva":
           this.setState({subCategoryOptions: subCategoryTemporaryData })
@@ -268,9 +256,7 @@ export default class HomeScreen extends React.Component {
   // but to force a re-render with each altering of HomeScreen state, it must be done
   _onDeleteSearchItem = (term, indexOfSubArray) => {
 
-    // console.log("HomeScreen deleteFunc term + index: " + term + ", " + indexOfSubArray)
     const updatedSubArray = this.state.andArrays[indexOfSubArray].filter(queryItem => queryItem.term != term)
-    // console.log("updatedSubArray length: " + updatedSubArray.length)
 
     if (updatedSubArray.length > 0) {
       
@@ -292,12 +278,6 @@ export default class HomeScreen extends React.Component {
 
     if (from === to) return
 
-      // console.log("draggedFromIndex: " + from)
-      // console.log("draggedToIndex: " + to)
-      // console.log("new combined andArray: " + andArray)
-
-      // TODO: the visual ui elements are not combined correctly (only one item remains after combination)
-
       let tempAndArraysState = this.state.andArrays.slice()
       tempAndArraysState[to] = andArray
       tempAndArraysState.splice(from, 1)
@@ -314,7 +294,6 @@ export default class HomeScreen extends React.Component {
   }
 
   _closeOrOpenSubCategoryFlatList(){
-    // console.log("size "+this.state.subCategoryOptions.length+" s "+this.state.showSubCategory)
     if (this.state.subCategoryOptions.length>0) {
       var arrowDirection = (this.state.showSubCategory ? "chevron-down" : "chevron-up")
       this.setState(prevState => ({ 
@@ -332,30 +311,14 @@ export default class HomeScreen extends React.Component {
 
   render() {
 
-    // console.log("triggered HomeScreen render!")
-
     const { navigate } = this.props.navigation
     const config = {
       velocityThreshold: 0.3,
       directionalOffsetThreshold: 80
-    };
-
-    // console.log(this.state.topLevelProps)
-    // console.log("props array in render:")
-    /* this.state.andArrays.forEach(array => {
-      array.forEach(queryData => {
-
-        console.log(queryData.term)
-      }) 
-    }) */
+    }
 
     return (
       <SafeAreaView style={ styles.container }>
-        {/*<GestureRecognizer
-          //onSwipeUp={(state) => this._onSwipeUp(state)}
-          onSwipeUp={() => this._closeOrOpenSubCategoryFlatList()}
-          config={config}
-        >    */}
         {(this.state.andArrays.length > 0) && 
           <SelectedFiltersFlatList
                 data = {this.state.andArrays}
@@ -408,7 +371,6 @@ export default class HomeScreen extends React.Component {
             </View>
           </View>
         )}
-        {/*</GestureRecognizer>*/}
         {(this.state.showSlider && this.state.andArrays.length > 0) && 
           <TimeLineSlider selectedStartYear={this.state.multiSliderValue[0]} selectedEndYear={this.state.multiSliderValue[1]} multiSliderValuesChange={this._multiSliderValuesChange} />
         }
@@ -424,7 +386,6 @@ export default class HomeScreen extends React.Component {
 
               const smallImageUrl = API.smallImageDisplayUrl(rowData)
               const fullImageUrl = API.fullImageDisplayUrl(rowData) // shown when opening the image details
-              // console.log("rowData: " + rowData)
               return (
                   <TouchableWithoutFeedback onPress={() => navigate('Details', { 
                     width: this.state.screenWidth, 
@@ -434,6 +395,7 @@ export default class HomeScreen extends React.Component {
                     setHomescreenState: this._setHomeScreenState
                   })}>
                     <View style={styles.box2} >
+                      {/* fullImageDisplayUrl passed also here, because it looks a lot better than smallImageDisplayUrl */}
                       <ImageCardListItem imageUrl={fullImageUrl}/>
                     </View>
                   </TouchableWithoutFeedback>
@@ -444,12 +406,6 @@ export default class HomeScreen extends React.Component {
         )}
         
         <View style={{flex:1}}>
-          {/*
-            <View style={{flex:0.5, justifyContent: 'space-around', height: 300, maxHeight: 300, backgroundColor: 'white', margin: 5, elevation: 10, margin: 5, padding: 5}}>
-              <Text style={{fontSize: 20}}>Information</Text>
-              <Text>Search images by clicking/tapping the main categories on top. This will show the images that belong to the category. Selected filters will pop up on the most top row after searching and sub categories will be seen on bottom of the main categories (if there are any). Selected filters (which will be seen on top after searching) can be combined (by long pressing and after it, dragging) for new type of queries, or deleted if no longer needed. If the filter is clicked just once, it will make it 'negative' item.</Text>
-            </View>
-          */}
           {(this.state.andArrays.length === 0) && (
           <ScrollView style={{flex: 1}}>
             <Card style={{marginTop:0, marginLeft: 5, marginRight: 5, marginBottom: 5}}>

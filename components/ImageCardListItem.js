@@ -1,14 +1,13 @@
 import React from 'react'
 import { StyleSheet, Dimensions } from 'react-native'
-//import { Card, CardTitle, CardContent, CardAction, CardButton, CardImage } from 'react-native-cards'
-import { Card } from 'react-native-paper';
+import { Card } from 'react-native-paper'
 
 const ImageCardListItem = ({ imageUrl }) => {
 
   return (
-      <Card style={styles.image}>
-          <Card.Cover  source={{ uri: imageUrl }} />
-      </Card>
+    <Card style={styles.image}>
+        <Card.Cover source={{ uri: imageUrl }} />
+    </Card>
   )
 }
 

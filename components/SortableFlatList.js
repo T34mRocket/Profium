@@ -147,7 +147,6 @@ class SortableFlatList extends Component {
     const sortedData = this.getSortedList(data, activeRow, spacerIndex)
     const isAfterActive = this._spacerIndex > activeRow
     const combinedList = this.combineNewList(data, activeRow, this._spacerIndex, isAfterActive)
-    // console.log("combinedList: " + combinedList.toString())
     this._moveAnim.setValue(this._releaseVal)
     this._spacerIndex = -1
     this.setState(initialState)
@@ -257,7 +256,6 @@ class SortableFlatList extends Component {
     const hoverItemSize = this._measurements[activeRow][horizontal ? 'width' : 'height']
     const hoverItemMidpoint = move - this._additionalOffset + hoverItemSize / 2
     const hoverPoint = Math.floor(hoverItemMidpoint + this._scrollOffset)
-    //console.log("hover point "+hoverPoint+" active "+activeRow+ " hover mid "+hoverItemMidpoint)
     let spacerIndex = this._pixels[hoverPoint]
     const isAfterActive = spacerIndex > activeRow
 

@@ -7,7 +7,7 @@ import { Icon, colors } from 'react-native-elements'
 import SelectedFiltersFlatList from '../components/SelectedFiltersFlatList'
 import API from '../api/API'
 import HomeScreen from './HomeScreen'
-import QueryData from '../dataclasses/QueryData';
+import QueryData from '../dataclasses/QueryData'
 
 export default class DetailsScreen extends React.Component {
 
@@ -28,14 +28,7 @@ export default class DetailsScreen extends React.Component {
 
     this.handleBackButtonClick = this.handleBackButtonClick.bind(this);
 
-    this.state = this.props.navigation.state.params.state /*{
-      width: null,
-      height: null,
-      timeStamp: '',
-      tags: [],
-      andArrays: this.props.navigation.state.params.data,
-
-    }*/
+    this.state = this.props.navigation.state.params.state
 
     this._obtainImageDetails()
   }
@@ -165,19 +158,6 @@ export default class DetailsScreen extends React.Component {
       return <Card.Actions style={{margin:0, padding: 0, paddingLeft:8, alignSelf:'flex-start'}} key={tag}>
                 <Button onPress={() => {this._onTagPress(tag)}}>{tag}</Button>
              </Card.Actions>
-      
-            //<CardContent text={tag} key={tag} />
-
-            // Todo: For some reason this code does not render like the top one??
-            // Use this if we want to show the buttons like the scrollable items in main screen
-            /*(<TouchableOpacity
-                    style={styles.button}
-                    onPress={() => {this._onTagPress(tag)}}
-                    delayPressIn={ 50 }
-                    key={tag}
-                  >
-                    <Text key={tag}>{tag}</Text>
-            </TouchableOpacity>)*/
     })
 
     const descriptions = this.state.tags.map(tag => {
@@ -197,8 +177,6 @@ export default class DetailsScreen extends React.Component {
         <Card style={styles.card}>
           <Card.Cover style={{height:this.state.height}} source={{uri: this.props.navigation.state.params.imageurl}} />
           <Card.Content>
-            {/*<Title>Card title</Title>
-            <Paragraph>Card content</Paragraph>*/}
             <View style={styles.row}>
             <View style={styles.box1}>
               <CardTitle
@@ -242,22 +220,6 @@ const styles = StyleSheet.create({
   },
   box2: {
     flex: 2
-  },
-  button: {
-    shadowColor: 'rgba(0,0,0, .4)', // IOS
-    shadowOffset: { height: 1, width: 1 }, // IOS
-    shadowOpacity: 1, // IOS
-    shadowRadius: 1, //IOS,
-    borderRadius: 5,
-    backgroundColor: '#fff',
-    elevation: 4, // Android
-    height: 36,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginLeft: 5,
-    marginRight:5,
-    marginBottom:8,
-    padding: 5
   },
   image:{
     backgroundColor: '#fff',

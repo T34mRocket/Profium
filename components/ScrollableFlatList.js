@@ -17,7 +17,6 @@ const ScrollableFlatList = ({ data, onCategoryItemPress }) => {
           return (
             <TouchableOpacity
               style={styles.button}
-              /*onPress={this.props.onMainCategoryPress(rowData)}*/
               onPress={() => {onCategoryItemPress(rowData); console.log("this is sub category "+rowData)}}
               delayPressIn={ 50 }
             >

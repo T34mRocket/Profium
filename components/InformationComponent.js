@@ -1,6 +1,6 @@
 import React from 'react'
 import { StyleSheet, View } from 'react-native'
-import { Button, Card, Title, Paragraph } from 'react-native-paper';
+import { Button, Card, Title, Paragraph } from 'react-native-paper'
 
 const InformationComponent = ({ toggleInformation }) => {
 
@@ -17,7 +17,7 @@ const InformationComponent = ({ toggleInformation }) => {
         <Paragraph>For making negative queries, you can click the selected filter once. This will change the color of that filter.</Paragraph>
         <Card.Cover style={styles.smallImage} source={{uri: 'http://users.metropolia.fi/~timili/images/Screenshot_20181204-152703%20-%20Copy.jpg'}} />
         <Card.Actions style={{marginLeft:0, paddingLeft:0}}>
-            <Button onPress={()=>{toggleInformation()}}>Hide</Button>
+          <Button onPress={()=>{toggleInformation()}}>Hide</Button>
         </Card.Actions>
     </Card.Content>
   )
