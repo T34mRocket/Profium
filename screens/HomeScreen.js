@@ -82,6 +82,8 @@ export default class HomeScreen extends React.Component {
         <SearchBar
           round
           lightTheme
+          autoCapitalize = 'none'
+          maxLength={30}
           clearIcon={{ color: 'black' }}
           //placeholderTextColor={'black'}
           containerStyle={{backgroundColor: '#517fa4', flex:1, alignSelf: 'center', borderTopColor:'#517fa4', borderBottomColor:'#517fa4'}}
