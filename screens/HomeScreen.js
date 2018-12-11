@@ -48,7 +48,7 @@ const subCategoryTemporaryData2 = [
 const DEFAULT_START_DATE = 1960
 const DEFAULT_END_DATE = (new Date()).getFullYear()
 
-// max number of search terms that can be present in the top pen
+// max numbers of search terms that can be present in the top pen
 const MAX_OR_QUERIES = 4
 const MAX_AND_QUERIES = 3
 
@@ -159,10 +159,13 @@ export default class HomeScreen extends React.Component {
       let endDate = searchByTime ? self.state.multiSliderValue[1].toString() : DEFAULT_END_DATE.toString() 
       endDate += '-12-31T23:59:59'
 
-      API.onChoosingPropsGetUrls(queryArray, startDate, endDate).then( array => {
+      API.onChoosingPropsGetUrls(queryArray, startDate, endDate).then( resultsArray => {
+
+        const extension = /\.(gif|jpg|jpeg|tiff|png)$/i // we need to filter out the one .docx that's returned for some reason
+        const filteredArray = resultsArray.filter(url => extension.test(url))
 
         self.setState({
-          chosenImages: array
+          chosenImages: filteredArray
         })
        })
     }, 10) // setTimeout
@@ -395,7 +398,6 @@ export default class HomeScreen extends React.Component {
             numColumns = { 3 }
             renderItem = {({ item: rowData }) => {
 
-              const smallImageUrl = API.smallImageDisplayUrl(rowData)
               const fullImageUrl = API.fullImageDisplayUrl(rowData) // shown when opening the image details
               return (
                   <TouchableWithoutFeedback onPress={() => navigate('Details', { 
