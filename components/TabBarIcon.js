@@ -3,6 +3,10 @@ import { Icon } from 'expo'
 
 import Colors from '../constants/Colors'
 
+/**
+ * @author Timi Liljeström
+ */
+
 export default class TabBarIcon extends React.Component {
   render() {
     return (

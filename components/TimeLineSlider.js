@@ -1,7 +1,11 @@
 import React from 'react'
 import { StyleSheet, View, Text, Dimensions } from 'react-native'
 import MultiSlider from '@ptomasroos/react-native-multi-slider'
-import { Card, CardContent } from 'react-native-cards'
+import { CardContent } from 'react-native-cards'
+
+/**
+ * @author Timi Liljeström
+ */
 
 const windowWidth = (Dimensions.get("window").width) - 40
 
@@ -35,7 +39,7 @@ const TimeLineSlider = ({ selectedStartYear, selectedEndYear, multiSliderValuesC
       </View>
     </View>
   )
-}
+} // TimeLineSlider
 
 export default TimeLineSlider
 
@@ -78,4 +82,4 @@ const styles = StyleSheet.create({
         fontSize: 14,
         marginRight: 5
     },
-})
+}) // styles

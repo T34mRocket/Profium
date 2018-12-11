@@ -1,7 +1,10 @@
 import React from 'react'
 import { Text, TouchableOpacity, FlatList, StyleSheet, View } from 'react-native'
 
-import '../api/API'
+/**
+ * Component that contains the clickable search items.
+ * @author Timi Liljeström
+ */
 
 const ScrollableFlatList = ({ data, onCategoryItemPress }) => {
 
@@ -17,7 +20,7 @@ const ScrollableFlatList = ({ data, onCategoryItemPress }) => {
           return (
             <TouchableOpacity
               style={styles.button}
-              onPress={() => {onCategoryItemPress(rowData); console.log("this is sub category "+rowData)}}
+              onPress={() => {onCategoryItemPress(rowData)}}
               delayPressIn={ 50 }
             >
               <Text>{rowData}</Text>
@@ -28,7 +31,7 @@ const ScrollableFlatList = ({ data, onCategoryItemPress }) => {
       />
     </View>
   )
-}
+} // ScrollableFlatList
 
 export default ScrollableFlatList
   
@@ -49,4 +52,4 @@ const styles = StyleSheet.create({
     marginBottom:8,
     padding: 5
   }
-})
+}) // styles

@@ -1,38 +1,34 @@
 import React from 'react'
 import {
-  Picker,
   Image,
-  Platform,
   ScrollView,
   StyleSheet,
   Text,
-  TouchableOpacity,
   TouchableWithoutFeedback,
   View,
-  Alert,
   FlatList,
   StatusBar,
   SafeAreaView,
   Dimensions
 } from 'react-native'
-import { WebBrowser } from 'expo'
-import GestureRecognizer, {swipeDirections} from 'react-native-swipe-gestures'
 import { Icon, SearchBar } from 'react-native-elements'
 import { Checkbox } from 'react-native-paper'
 import { Button, Card } from 'react-native-paper'
-import { MonoText } from '../components/StyledText'
-import { CustomPicker } from 'react-native-custom-picker'
-import { CardTitle, CardContent } from 'react-native-cards'
 import ScrollableFlatList from '../components/ScrollableFlatList'
 import ImageCardListItem from '../components/ImageCardListItem'
-import API, { QUERY_TYPE } from '../api/API'
-import HierarchySeparatorLine from '../components/HierarchySeparatorLine'
+import API from '../api/API'
 import SelectedFiltersFlatList from '../components/SelectedFiltersFlatList'
 import TimeLineSlider from '../components/TimeLineSlider'
 import QueryData from '../dataclasses/QueryData'
 import InformationComponent from '../components/InformationComponent'
 
-// TODO: delete when we get sub categories from SPARQL DB
+/**
+ * The 'main' file of the app that keeps track of the overall app state
+ * and presents the main ui view.
+ * @author Ville Lohkovuori, Timi Liljeström
+ */
+
+// placeholder data (since we have no actual subcategories)
 const subCategoryTemporaryData = [
     "subcategory 1",
     "subcategory 2",
@@ -40,7 +36,7 @@ const subCategoryTemporaryData = [
     "subcategory 4",
 ]
 
-// TODO: delete when we get sub categories from SPARQL DB
+// placeholder data (since we have no actual subcategories)
 const subCategoryTemporaryData2 = [
     "hi",
     "hey",
@@ -53,10 +49,11 @@ const DEFAULT_START_DATE = 1960
 const DEFAULT_END_DATE = (new Date()).getFullYear()
 
 // max number of search terms that can be present in the top pen
-const MAX_QUERIES = 4
+const MAX_OR_QUERIES = 4
 const MAX_AND_QUERIES = 3
 
 export default class HomeScreen extends React.Component {
+
   static navigationOptions = ({ navigation }) => ({
     header: ( /* Custom header */
       <View
@@ -85,12 +82,9 @@ export default class HomeScreen extends React.Component {
           autoCapitalize = 'none'
           maxLength={30}
           clearIcon={{ color: 'black' }}
-          //placeholderTextColor={'black'}
           containerStyle={{backgroundColor: '#517fa4', flex:1, alignSelf: 'center', borderTopColor:'#517fa4', borderBottomColor:'#517fa4'}}
           inputStyle={{backgroundColor: 'white'}}
           placeholder='Search'
-          // call this if we want to have search that updates every time there are new letters in the search bar
-          onChangeText={(item)=>{ /* console.log(item) */}}
           // called when enter/return is tapped on keyboard 
           onSubmitEditing={(event) => {navigation.state.params.addTypedQuery(event.nativeEvent.text)}} />
       </View>
@@ -99,17 +93,16 @@ export default class HomeScreen extends React.Component {
 
   constructor(props) {
     super(props)
+
     this.state = {
       topLevelProps: [],
       chosenImages: [], // urls
       subCategoryOptions: [],
       showSubCategory: false,
       clickedCategoryItem: '',
+
       andArrays: [], // array of arrays of combined elements in one AND-type query (visually, a bunch of dragged together search terms)
-      // IMPORTANT NOTE: it seems that all the images under our categories have the same timestamp; 
-      // if I alter the end date to be before that time ('2017-04-28T05:13:21'), no images are returned.
-      // unless the timestamps are updated to be more variable, our timeline feature is both useless
-      // and almost impossible to test for proper functionality
+
       multiSliderValue: [DEFAULT_START_DATE, DEFAULT_END_DATE],
       showSlider: false,
       iconArrow: null,
@@ -124,17 +117,18 @@ export default class HomeScreen extends React.Component {
 
   componentDidMount = () => {
 
+    // we need to pass this method to the SearchBar in the static navigationOptions
     this.props.navigation.setParams({
       addTypedQuery: this._addTypedQuery
     })
 
-    // I'm not sure why tf it needs such an elaborate check, but it doesn't work without it
+    // I'm not sure why it needs such an elaborate check, but it doesn't work without it
     if (typeof this.state.topLevelProps === undefined || this.state.topLevelProps.length <= 0) {
 
-      API.getTopLevelImageProps().then( resultsSet => {
+      API.getTopLevelImageProps().then( resultsArray => {
       
         this.setState({
-          topLevelProps: Array.from(resultsSet)
+          topLevelProps: resultsArray
         })
       })
     }
@@ -158,7 +152,7 @@ export default class HomeScreen extends React.Component {
         return
       }
 
-      // plate of mom's spaghetti... -.- fix asap! especially once we can search by month!
+      // plate of mom's spaghetti... since we have no month-based searching, this works for now though
       const searchByTime = self.state.showSlider
       let startDate = searchByTime ? self.state.multiSliderValue[0].toString() : DEFAULT_START_DATE.toString()
       startDate += '-01-01T00:00:00'
@@ -167,41 +161,22 @@ export default class HomeScreen extends React.Component {
 
       API.onChoosingPropsGetUrls(queryArray, startDate, endDate).then( array => {
 
-        // const arr = Array.from(resultsSet) // TODO: needs a check to see if it's a Set !
-
         self.setState({
           chosenImages: array
         })
-       }) // then
+       })
     }, 10) // setTimeout
   } // _fetchImagesBasedOnProps
 
   // called when hitting 'enter' after typing in the search bar
-  // NOTE: almost identical to _flatListItemPress. we're running out of time 
-  // to maintain good code structure
   _addTypedQuery = (typedString) => {
 
-    typedString = typedString.toLowerCase()
+    // it makes sense to make the query strings case-agnostic, as the user doesn't know the casing 
+    // when typing. right now, all the top categories are fetched by default, so the search is 
+    // pretty useless, but it works and would be useable with more varied data
+    typedString = typedString.toLowerCase() 
 
-    let oneItemSubArrayContainsItem = false
-    this.state.andArrays.forEach(andArray => {
-
-      if (andArray.length === 1) {
-
-        if(andArray[0].term === typedString) {
-          oneItemSubArrayContainsItem = true
-        }
-      }
-    })
-    // you can't add more than one 'orphan' search term; e.g. 'dog' OR 'dog' OR 'dog'.
-    // combining terms with other terms twice or more is fine though;
-    // e.g. 'dog AND alive' OR 'dog AND red'
-    if(oneItemSubArrayContainsItem || this.state.andArrays.length >= MAX_QUERIES) return
-
-    console.log("typed: " + typedString)
-    this.setState(prevState => ({
-      andArrays: [[new QueryData(typedString, false)], ...prevState.andArrays] // queries are positive by default
-    }))
+    this.addOrTypeSearchItem(typedString, this)
     this._fetchImagesBasedOnProps()
   } // _addTypedQuery
 
@@ -211,19 +186,11 @@ export default class HomeScreen extends React.Component {
     // NOTE: there might be a less convoluted way to do this, but rn I can't think of it
     let subArray = this.state.andArrays[subArrayIndex].slice()
 
-    subArray.forEach(queryData => {
-      console.log("isNegatives in toggleNeg before: " + queryData.isNegative)
-    })
-
     subArray.map(queryData => {
         if (queryData.term === term) {
         queryData.isNegative = !queryData.isNegative
         return queryData
       }
-    }) // map
-
-    subArray.forEach(queryData => {
-      console.log("isNegatives in toggleNeg after: " + queryData.isNegative)
     })
     
     let tempAndArraysState = this.state.andArrays.slice() // copy the state... inefficient but whatever
@@ -240,28 +207,7 @@ export default class HomeScreen extends React.Component {
   // given to ScrollableFlatList as its onCategoryItemPress callback
   _onFlatListItemPress = (item) => {
 
-    // changed things so that andArrays (formerly selectedFiltersArray) is an array of arrays;
-    // the subarrays' contents represent AND-type queries, while the
-    // subarrays themselves represent OR-type queries. a query's negativity
-    // is a boolean on the actual stored Query object (within each subarray)
-    let oneItemSubArrayContainsItem = false
-    this.state.andArrays.forEach(andArray => {
-
-      if (andArray.length === 1) {
-
-        if(andArray[0].term === item) {
-          oneItemSubArrayContainsItem = true
-        }
-      }
-    })
-    // you can't add more than one 'orphan' search term; e.g. 'dog' OR 'dog' OR 'dog'.
-    // combining terms with other terms twice or more is fine though;
-    // e.g. 'dog AND alive' OR 'dog AND red'
-    if(oneItemSubArrayContainsItem || this.state.andArrays.length >= MAX_QUERIES) return
-
-    this.setState(prevState => ({
-      andArrays: [[new QueryData(item, false)], ...prevState.andArrays] // queries are positive by default
-    }))
+    this.addOrTypeSearchItem(item, this)
     this._fetchImagesBasedOnProps()
     
     this.setState({clickedCategoryItem: item})
@@ -288,6 +234,31 @@ export default class HomeScreen extends React.Component {
     this.setState({showSubCategory: true, iconArrow: 'chevron-up'})
   } // _onFlatListItemPress
 
+  // helper method to reduce code duplication.
+  // used in _onFlatListItemPress, _addTypedQuery, and in DetailsScreen's _onTagPress.
+  // NOTE: we need the 'this' reference due to some hacky ui update stuffs in DetailsScreen
+  addOrTypeSearchItem = (item, self) => {
+
+    let oneItemSubArrayContainsItem = false
+    self.state.andArrays.forEach(andArray => {
+
+      if (andArray.length === 1) {
+
+        if(andArray[0].term === item) {
+          oneItemSubArrayContainsItem = true
+        }
+      }
+    })
+    // you can't add more than one 'orphan' search term; e.g. 'dog' OR 'dog' OR 'dog'.
+    // combining terms with other terms twice or more is fine though;
+    // e.g. 'dog AND alive' OR 'dog AND red'
+    if(oneItemSubArrayContainsItem || self.state.andArrays.length >= MAX_OR_QUERIES) return
+
+    self.setState(prevState => ({
+      andArrays: [[new QueryData(item, false)], ...prevState.andArrays] // queries are positive by default
+    }))
+  } // addOrTypeSearchItem
+
   // passed all the way down to individual SearchItem components... non-ideal, 
   // but to force a re-render with each altering of HomeScreen state, it must be done
   _onDeleteSearchItem = (term, indexOfSubArray) => {
@@ -296,7 +267,7 @@ export default class HomeScreen extends React.Component {
 
     if (updatedSubArray.length > 0) {
       
-      let tempAndArraysState = this.state.andArrays.slice() // copy the state... inefficient but whatever
+      let tempAndArraysState = this.state.andArrays.slice()
       tempAndArraysState[indexOfSubArray] = updatedSubArray
       this.setState({ andArrays: tempAndArraysState })
     } else {
@@ -314,7 +285,7 @@ export default class HomeScreen extends React.Component {
 
     if (from === to) return
 
-    // the ui can only accommodate a limited number of AND-type queries
+    // the ui can only comfortably fit a limited number of AND-type queries
     if (this.state.andArrays[to].length >= MAX_AND_QUERIES) return
 
     let tempAndArraysState = this.state.andArrays.slice()
@@ -332,7 +303,8 @@ export default class HomeScreen extends React.Component {
     this._fetchImagesBasedOnProps()
   }
 
-  _closeOrOpenSubCategoryFlatList(){
+  _closeOrOpenSubCategoryFlatList() {
+
     if (this.state.subCategoryOptions.length>0) {
       var arrowDirection = (this.state.showSubCategory ? "chevron-down" : "chevron-up")
       this.setState(prevState => ({ 
@@ -431,6 +403,7 @@ export default class HomeScreen extends React.Component {
                     imageurl: fullImageUrl,
                     rawImageUrl: rowData,
                     state: this.state,
+                    onTagPress: this.addOrTypeSearchItem,
                     setHomescreenState: this._setHomeScreenState
                   })}>
                     <View style={styles.box2} >
@@ -461,7 +434,7 @@ export default class HomeScreen extends React.Component {
       </SafeAreaView>
     ) // return
   } // render
-} // class
+} // HomeScreen
 
 const styles = StyleSheet.create({
   container: {

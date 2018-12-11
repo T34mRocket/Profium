@@ -1,27 +1,30 @@
 import React from 'react'
-import { ScrollView, StyleSheet, View, Image, BackHandler, TouchableOpacity, Text } from 'react-native'
-import { CardTitle, CardContent, CardAction, CardButton, CardImage } from 'react-native-cards'
-import { Button, Card, Title, Paragraph } from 'react-native-paper'
+import { ScrollView, StyleSheet, View, Image, BackHandler } from 'react-native'
+import { CardTitle, CardContent } from 'react-native-cards'
+import { Button, Card } from 'react-native-paper'
 import { HeaderBackButton } from 'react-navigation'
-import { Icon, colors } from 'react-native-elements'
 import SelectedFiltersFlatList from '../components/SelectedFiltersFlatList'
 import API from '../api/API'
-import HomeScreen from './HomeScreen'
-import QueryData from '../dataclasses/QueryData'
+
+/**
+ * Component for the detail view that opens when you click on an image in
+ * the main view.
+ * @author Timi Liljeström, Ville Lohkovuori
+ */
 
 export default class DetailsScreen extends React.Component {
 
   static navigationOptions = ({navigation}) => ({
     
-      title: 'Details',
-      headerLeft: ( <HeaderBackButton tintColor={'white'} onPress={ () => { 
-        navigation.state.params.onBackPress()
-      } }  /> ),
-      headerStyle: {
-        backgroundColor: '#517fa4',
-      },
-      headerTintColor: 'white',
-  })
+    title: 'Details',
+    headerLeft: ( <HeaderBackButton tintColor={'white'} onPress={ () => { 
+      navigation.state.params.onBackPress()
+    } }  /> ),
+    headerStyle: {
+      backgroundColor: '#517fa4',
+    },
+    headerTintColor: 'white',
+  }) // navigationOptions
 
   constructor(props) {
     super(props)
@@ -49,12 +52,11 @@ export default class DetailsScreen extends React.Component {
         if (queryData.term === term) {
         queryData.isNegative = !queryData.isNegative
       }
-    }) // map
+    })
     
     let tempAndArraysState = this.state.andArrays.slice() // copy the state... inefficient but whatever
     tempAndArraysState[subArrayIndex] = subArray
     this.setState({ andArrays: tempAndArraysState })
-
   } // _toggleNegativity
 
   _onDeleteSearchItem = (term, indexOfSubArray) => {
@@ -63,7 +65,7 @@ export default class DetailsScreen extends React.Component {
 
     if (updatedSubArray.length > 0) {
       
-      let tempAndArraysState = this.state.andArrays.slice() // copy the state... inefficient but whatever
+      let tempAndArraysState = this.state.andArrays.slice()
       tempAndArraysState[indexOfSubArray] = updatedSubArray
       this.setState({ andArrays: tempAndArraysState })
     } else {
@@ -73,7 +75,6 @@ export default class DetailsScreen extends React.Component {
 
       this.setState({ andArrays: tempAndArraysState2 })
     }
-
   } // _onDeleteSearchItem
 
   // called when dropping a visual search item on another in the top pen
@@ -85,51 +86,33 @@ export default class DetailsScreen extends React.Component {
     tempAndArraysState[to] = andArray
     tempAndArraysState.splice(from, 1)
     this.setState({ andArrays: tempAndArraysState })
-
   } // _onFilterDrag
 
   _onTagPress = (item) => {
 
-    let oneItemSubArrayContainsItem = false
-    this.state.andArrays.forEach(andArray => {
-
-      if (andArray.length === 1) {
-
-        if(andArray[0].term === item) {
-          oneItemSubArrayContainsItem = true
-        }
-      }
-    })
-    // you can't add more than one 'orphan' search term; e.g. 'dog' OR 'dog' OR 'dog'.
-    // combining terms with other terms twice or more is fine though;
-    // e.g. 'dog AND alive' OR 'dog AND red'
-    if(oneItemSubArrayContainsItem || this.state.andArrays.length >= HomeScreen.MAX_QUERIES) return
-
-    this.setState(prevState => ({
-      andArrays: [[new QueryData(item, false)], ...prevState.andArrays] // queries are positive by default
-    }))
-
+    this.props.navigation.state.params.onTagPress(item, this)
   } // _onTagPress
 
   componentWillMount() {
-      BackHandler.addEventListener('hardwareBackPress', this.handleBackButtonClick);
-      // resize image based on the passed parameters (width or height)
-      Image.getSize(this.props.navigation.state.params.imageurl, (width, height) => {
-          if (this.props.navigation.state.params.width && !this.props.navigation.state.params.height) {
-              this.setState({
-                  width: this.props.navigation.state.params.width,
-                  height: height * (this.props.navigation.state.params.width / width)
-              });
-          } else if (!this.props.navigation.state.params.width && this.props.navigation.state.params.height) {
-              this.setState({
-                  width: width * (this.props.navigation.state.params.height / height),
-                  height: this.props.navigation.state.params.height
-              });
-          } else {
-              this.setState({ width: width, height: height });
-          }
-      });
-  }
+
+    BackHandler.addEventListener('hardwareBackPress', this.handleBackButtonClick)
+    // resize image based on the passed parameters (width or height)
+    Image.getSize(this.props.navigation.state.params.imageurl, (width, height) => {
+      if (this.props.navigation.state.params.width && !this.props.navigation.state.params.height) {
+        this.setState({
+          width: this.props.navigation.state.params.width,
+          height: height * (this.props.navigation.state.params.width / width)
+        })
+      } else if (!this.props.navigation.state.params.width && this.props.navigation.state.params.height) {
+        this.setState({
+          width: width * (this.props.navigation.state.params.height / height),
+          height: this.props.navigation.state.params.height
+        })
+      } else {
+        this.setState({ width: width, height: height })
+      }
+    })
+  } // componentWillMount
 
   componentWillUnmount() {
     BackHandler.removeEventListener('hardwareBackPress', this.handleBackButtonClick);
@@ -166,39 +149,39 @@ export default class DetailsScreen extends React.Component {
     })
 
     return (
-    <View style={{flex:1}}>
-      <SelectedFiltersFlatList
-              data = {this.state.andArrays}
-              onDelete = {this._onDeleteSearchItem}
-              toggleNegativity = {this._toggleNegativity}
-              onFilterDrag = {this._onFilterDrag}
-      />
-      <ScrollView style={styles.container}>
-        <Card style={styles.card}>
-          <Card.Cover style={{height:this.state.height}} source={{uri: this.props.navigation.state.params.imageurl}} />
-          <Card.Content>
-            <View style={styles.row}>
-            <View style={styles.box1}>
-              <CardTitle
-                subtitle="Property"
-              />
-              <CardContent text={`Taken:`} />
-              {descriptions}
-            </View>
-            <View style={styles.box2} >
-              <CardTitle
+      <View style={{flex:1}}>
+        <SelectedFiltersFlatList
+                data = {this.state.andArrays}
+                onDelete = {this._onDeleteSearchItem}
+                toggleNegativity = {this._toggleNegativity}
+                onFilterDrag = {this._onFilterDrag}
+        />
+        <ScrollView style={styles.container}>
+          <Card style={styles.card}>
+            <Card.Cover style={{height:this.state.height}} source={{uri: this.props.navigation.state.params.imageurl}} />
+            <Card.Content>
+              <View style={styles.row}>
+              <View style={styles.box1}>
+                <CardTitle
+                  subtitle="Property"
+                />
+                <CardContent text={`Taken:`} />
+                {descriptions}
+              </View>
+              <View style={styles.box2} >
+                <CardTitle
                   subtitle={`Value`}
-              />
-              <CardContent text={this.state.timeStamp} />
-              {tags}
+                />
+                <CardContent text={this.state.timeStamp} />
+                {tags}
+              </View>
             </View>
-          </View>
-          </Card.Content>
-        </Card>
-      </ScrollView>
-    </View>
-  )}
-}
+            </Card.Content>
+          </Card>
+        </ScrollView>
+      </View>
+  )} // render
+} // DetailsScreen
 
 const styles = StyleSheet.create({
   card: {
@@ -225,4 +208,4 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     marginTop: 5
   }
-})
+}) // styles

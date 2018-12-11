@@ -1,7 +1,3 @@
-// NOTE: 
-// Most of the code is from: https://github.com/computerjazz/react-native-draggable-flatlist/blob/master/index.js
-// We have just modified it for our needs (dragging and combining those flat list items for AND/OR type search queries)
-
 import React, { Component, PureComponent } from 'react'
 import {
   LayoutAnimation,
@@ -15,6 +11,12 @@ import {
   StatusBar,
   StyleSheet,
 } from 'react-native'
+
+/**
+ * NOTE: Most of the code is from: https://github.com/computerjazz/react-native-draggable-flatlist/blob/master/index.js 
+ * We have just modified it for our needs (dragging and combining those flat list items for AND/OR type search queries).
+ * @author Timi Liljeström, Ville Lohkovuori
+ */
 
 // Measure function triggers false positives
 YellowBox.ignoreWarnings(['Warning: isMounted(...) is deprecated'])
@@ -159,19 +161,19 @@ class SortableFlatList extends Component {
       to: spacerIndex - (isAfterActive ? 1 : 0),
       data: combinedList,
     })
-  }
+  } // onReleaseAnimationEnd
 
+  // NOTE: the names and functionalities of some of these methods are a 'little bit' 
+  // cryptic... we were kind of in a hurry when we worked on this.
+  // it's too dangerous to try and 'fix' things now to be more aesthetic...
+  // Anyway, this method is the main 'beef' that combines dragged together search items.
   combineNewList = (data, activeRow, spacerIndex, isAfterActive) => {
     
     let combinedTo = spacerIndex
     if(isAfterActive){
       combinedTo = spacerIndex-1
     } 
-    // console.log(`draggedFrom: ${activeRow}, draggedTo: ${combinedTo}`)
 
-    // note: if the indexes are the same, ideally this method would return early.
-    // it's not too harmful to have it go through the motions anyway though,
-    // so I'm leaving it like this for the moment. priorities, etc.
     const from = activeRow
     const to = combinedTo
 
@@ -203,7 +205,7 @@ class SortableFlatList extends Component {
     }, [])
     if (spacerIndex >= data.length) sortedData.push(data[activeRow])
     return sortedData
-  }
+  } // getSortedList
 
   animate = () => {
     const { activeRow } = this.state
@@ -214,10 +216,6 @@ class SortableFlatList extends Component {
     if (nextSpacerIndex > -1 && nextSpacerIndex !== this._spacerIndex) {
       LayoutAnimation.easeInEaseOut()
       
-      /*this.setState({
-        spacerIndex: nextSpacerIndex, 
-      })*/
-       
       this._spacerIndex = nextSpacerIndex
       if (nextSpacerIndex === data.length) this._flatList.scrollToEnd()
     }
@@ -237,7 +235,7 @@ class SortableFlatList extends Component {
     }
 
     requestAnimationFrame(this.animate)
-  }
+  } // animate
 
   scroll = (scrollAmt, spacerIndex) => {
     if (spacerIndex >= this.props.data.length) return this._flatList.scrollToEnd()
@@ -302,7 +300,7 @@ class SortableFlatList extends Component {
     }
     // Spacer index differs according to placement. See note in onPanResponderRelease
     return spacerIndex > activeRow ? spacerIndex + 1 : spacerIndex
-  }
+  } // getSpacerIndex
 
   measureItem = (index) => {
     const { activeRow } = this.state
@@ -328,7 +326,7 @@ class SortableFlatList extends Component {
         console.log('## measure error -- index: ', index, activeRow, this._refs[index], e)
       }
     }, 100)
-  }
+  } // measureItem
 
   move = (hoverComponent, index) => {
     const { onMoveBegin } = this.props
@@ -345,7 +343,7 @@ class SortableFlatList extends Component {
       hoverComponent,
     }, () => onMoveBegin && onMoveBegin(index)
     )
-  }
+  } // move
 
   moveEnd = () => {
     if (!this._hasMoved) this.setState(initialState)
@@ -379,7 +377,7 @@ class SortableFlatList extends Component {
         extraData={this.state.extraData}
       />
     )
-  }
+  } // renderItem
 
   renderHoverComponent = () => {
     const { hoverComponent, onTopOfNextComponent } = this.state
@@ -392,7 +390,7 @@ class SortableFlatList extends Component {
         {hoverComponent}
       </Animated.View>
     )
-  }
+  } // renderHoverComponent
 
   measureContainer = ref => {
     if (ref && this._containerOffset === undefined) {
@@ -405,7 +403,7 @@ class SortableFlatList extends Component {
         })
       }, 50)
     }
-  }
+  } // measureContainer
 
   keyExtractor = (item, index) => `sortable-flatlist-item-${index}`
 
@@ -439,8 +437,8 @@ class SortableFlatList extends Component {
         {this.renderHoverComponent()}
       </View>
     )
-  }
-}
+  } // render
+} // SortableFlatList
 
 export default SortableFlatList
 
@@ -483,7 +481,7 @@ class RowItem extends PureComponent {
       </View>
     )
   }
-}
+} // RowItem
 
 const styles = StyleSheet.create({
   hoverComponentVertical: {
@@ -517,4 +515,4 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     borderRadius: 4
   }
-})
+}) // styles

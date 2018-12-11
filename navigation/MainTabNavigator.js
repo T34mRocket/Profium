@@ -1,11 +1,10 @@
 import React from 'react'
 import { Platform } from 'react-native'
-import { createStackNavigator, createBottomTabNavigator } from 'react-navigation'
-
-import TabBarIcon from '../components/TabBarIcon'
-import HomeScreen from '../screens/HomeScreen'
+import { createStackNavigator } from 'react-navigation'
 import HistoryScreen from '../screens/HistoryScreen'
 import SettingsScreen from '../screens/SettingsScreen'
+import TabBarIcon from '../components/TabBarIcon'
+import HomeScreen from '../screens/HomeScreen'
 import DetailsScreen from '../screens/DetailsScreen'
 
 const HomeStack = createStackNavigator({
@@ -54,6 +53,7 @@ SettingsStack.navigationOptions = {
     />
   ),
 }
+
 
 export default HomeStack/* createStackNavigator({
   HomeStack,

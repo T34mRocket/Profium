@@ -2,6 +2,12 @@ import React from 'react'
 import { View } from 'react-native'
 import SearchItem from './SearchItem'
 
+/**
+ * A graphical representation of an andArray in the HomeScreen state.
+ * Needed to deal with combining and dragging the search items.
+ * @author Ville Lohkovuori, Timi Liljeström
+ */
+
 export default class AndContainer extends React.Component {
 
   constructor(props) {
@@ -11,7 +17,6 @@ export default class AndContainer extends React.Component {
   render() {
     
     const termList = this.props.searchItems.map( (queryData) => 
-      // console.log("queryData term in AndContainer: " + queryData.term); NOTE: enabling it wreaks havoc without extra parentheses !!
       <SearchItem 
         queryData={queryData} 
         onDeleteItem={this.props.onDelete} 

@@ -2,6 +2,7 @@
 /**
  * This needs to be a class because we need two fields -- one 
  * for the value of the search term and one to indicate search type (negative or positive).
+ * (AND and OR-type queries are handled by the array structure that contains the QueryData objects.)
  * @author Ville Lohkovuori
  */
 

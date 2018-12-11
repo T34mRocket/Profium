@@ -1,25 +1,29 @@
 import React from 'react'
-import { Chip } from 'react-native-paper'
 import { StyleSheet, TouchableOpacity, Text } from 'react-native'
 import { Icon } from 'react-native-elements'
 
+/**
+ * @author Ville Lohkovuori, Timi Liljeström
+ */
+
 export default class SearchItem extends React.Component { 
 
-  // again, this could be a functional component
+  // this could be a functional component I suppose, but I've hard that 
+  // if you include methods in a component, it should be of the class type
   constructor(props) {
     super(props)
   }
 
-  // uses stuffs that are passed here all the way from HomeScreen... beautiful f'in mess, React -.-
   _onDeleteItem = () => {
 
+    // passed here all the way from HomeScreen
     this.props.onDeleteItem(this.props.queryData.term, this.props.containerArrayIndex)
   }
 
   // toggles the isNegative property of the corresponding queryData item in the app state array.
-  // passed down all the way from HomeScreen
   _toggleNegativity = () => {
 
+    // passed down all the way from HomeScreen
     this.props.toggleNegativity(this.props.queryData.term, this.props.containerArrayIndex)
   }
 
@@ -30,7 +34,6 @@ export default class SearchItem extends React.Component {
         <TouchableOpacity
           style={{ 
             height: 40, 
-            //backgroundColor: `${ !this.props.isActive }%` ? 'rgba(52, 52, 52, 0.8)' : 'white',
             backgroundColor: this.props.queryData.isNegative ? 'rgba(142, 142, 142, 0.6)' : 'transparent',
             alignItems: 'center', 
             justifyContent: 'center',
@@ -54,7 +57,6 @@ export default class SearchItem extends React.Component {
         <TouchableOpacity
           style={{ 
             height: 40, 
-            //backgroundColor: `${ !this.props.isActive }%` ? 'rgba(52, 52, 52, 0.8)' : 'white',
             alignItems: 'center', 
             justifyContent: 'center',
             flexDirection: "row",
@@ -62,7 +64,6 @@ export default class SearchItem extends React.Component {
           }}
           onLongPress={this.props.move}
           onPressOut={this.props.moveEnd}
-          //onPress={()=>{this._toggleNegativity()}}
         >
           {this.props.allSearchItemsInAndArray.map((item)=>{
             return(
@@ -82,9 +83,8 @@ export default class SearchItem extends React.Component {
         </TouchableOpacity>
       )
     } // else
-  }
+  } // render
     
-
 } // SearchItem
 
 const styles = StyleSheet.create({

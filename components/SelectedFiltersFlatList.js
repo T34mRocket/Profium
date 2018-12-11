@@ -1,10 +1,12 @@
 import React from 'react'
-import { FlatList, StyleSheet, View, TouchableOpacity, Text } from 'react-native'
-import { Icon } from 'react-native-elements'
-import { Chip } from 'react-native-paper'
-import HierarchySeparatorLine from './HierarchySeparatorLine'
+import { StyleSheet, View } from 'react-native'
 import AndContainer from './AndContainer'
 import SortableFlatList from './SortableFlatList'
+
+/**
+ * Component that contains the selected search items in the top pen of the ui.
+ * @author Timi Liljeström
+ */
 
 const SelectedFiltersFlatList = ({ data, onDelete, toggleNegativity, onFilterDrag }) => {
 
@@ -21,7 +23,7 @@ const SelectedFiltersFlatList = ({ data, onDelete, toggleNegativity, onFilterDra
         isActive={isActive} 
       />
     )
-  }
+  } // renderItem
 
   return (
     <View style={ styles.container }>

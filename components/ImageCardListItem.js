@@ -1,6 +1,10 @@
 import React from 'react'
-import { StyleSheet, Dimensions } from 'react-native'
+import { StyleSheet } from 'react-native'
 import { Card } from 'react-native-paper'
+
+/**
+ * @author Timi Liljeström
+ */
 
 const ImageCardListItem = ({ imageUrl }) => {
 
