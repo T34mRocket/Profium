@@ -427,7 +427,7 @@ export default class HomeScreen extends React.Component {
                 <Button onPress={this._toggleInformation}>{(this.state.showInformation)? 'Hide' : 'How to use?'}</Button>
               </Card.Actions>
               {(this.state.showInformation) && (
-                <InformationComponent toggleInformation={this._toggleInformation} />
+                <InformationComponent toggleInformation={this._toggleInformation} MAX_AND_QUERIES={MAX_AND_QUERIES} MAX_OR_QUERIES={MAX_OR_QUERIES}/>
               )}
             </Card>
           </ScrollView>
