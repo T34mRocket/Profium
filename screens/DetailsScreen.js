@@ -5,7 +5,6 @@ import { Button, Card } from 'react-native-paper'
 import { HeaderBackButton } from 'react-navigation'
 import SelectedFiltersFlatList from '../components/SelectedFiltersFlatList'
 import API from '../api/API'
-import HomeScreen from './HomeScreen'
 
 /**
  * Component for the detail view that opens when you click on an image in
@@ -41,62 +40,33 @@ export default class DetailsScreen extends React.Component {
 
     API.getImageDetails(this.props.navigation.state.params.rawImageUrl).then(imageDetails => {  
 
-      console.log("timeStamp: " + imageDetails.timeStamp)
       this.setState({ timeStamp: imageDetails.timeStamp, tags: imageDetails.tags })
     })
   }
 
-  _toggleNegativity = (term, subArrayIndex) => {
+  toggleNegativity = (term, subArrayIndex) => {
 
-    // NOTE: there might be a less convoluted way to do this, but rn I can't think of it
-    let subArray = this.state.andArrays[subArrayIndex].slice()
-    subArray.map(queryData => {
-        if (queryData.term === term) {
-        queryData.isNegative = !queryData.isNegative
-      }
-    })
-    
-    let tempAndArraysState = this.state.andArrays.slice() // copy the state... inefficient but whatever
-    tempAndArraysState[subArrayIndex] = subArray
-    this.setState({ andArrays: tempAndArraysState })
-  } // _toggleNegativity
+    this.props.navigation.state.params.toggleNegativity(term, subArrayIndex, this)
+    this._setHomeScreenState()
+  }
 
-  _onDeleteSearchItem = (term, indexOfSubArray) => {
+  onDeleteSearchItem = (term, indexOfSubArray) => {
 
-    const updatedSubArray = this.state.andArrays[indexOfSubArray].filter(queryItem => queryItem.term != term)
+    this.props.navigation.state.params.onDeleteSearchItem(term, indexOfSubArray, this)
+    this._setHomeScreenState()
+  }
 
-    if (updatedSubArray.length > 0) {
-      
-      let tempAndArraysState = this.state.andArrays.slice()
-      tempAndArraysState[indexOfSubArray] = updatedSubArray
-      this.setState({ andArrays: tempAndArraysState })
-    } else {
+  onFilterDrag = (from, to, andArray) => {
 
-      let tempAndArraysState2 = this.state.andArrays.slice()
-      tempAndArraysState2.splice(indexOfSubArray, 1)  // remove the subArray
-
-      this.setState({ andArrays: tempAndArraysState2 })
-    }
-  } // _onDeleteSearchItem
-
-  // called when dropping a visual search item on another in the top pen
-  _onFilterDrag = (from, to, andArray) => {
-
-    if (from === to) return
-
-    // the ui can only comfortably fit a limited number of AND-type queries
-    if (andArray.length > HomeScreen.MAX_AND_QUERIES) return
-
-    let tempAndArraysState = this.state.andArrays.slice()
-    tempAndArraysState[to] = andArray
-    tempAndArraysState.splice(from, 1)
-    this.setState({ andArrays: tempAndArraysState })
-  } // _onFilterDrag
+    this.props.navigation.state.params.onFilterDrag(from, to, andArray, this)
+    this._setHomeScreenState()
+  }
 
   _onTagPress = (item) => {
 
     this.props.navigation.state.params.onTagPress(item, this)
-  } // _onTagPress
+    this._setHomeScreenState()
+  }
 
   componentWillMount() {
 
@@ -129,14 +99,20 @@ export default class DetailsScreen extends React.Component {
     })
   }
 
-  // when navigating back, set home screen state as the same as details screen's current state ->
-  // this is because we don't have time to implement state management (MobX or Redux)  
-  // at this point anymore
+  // there's no need to set HomeScreen's state on back press anymore, as it's done with each change of DetailsScreen's state
   handleBackButtonClick() {
-    this.props.navigation.state.params.setHomescreenState(this.state)
-    this.props.navigation.goBack(null);
-    
+
+    this.props.navigation.goBack(null)
     return true;
+  }
+
+  _setHomeScreenState() {
+
+    const self = this
+    setTimeout(function() {
+
+      self.props.navigation.state.params.setHomescreenState(self.state)
+    }, 50)
   }
 
   render() {
@@ -157,9 +133,9 @@ export default class DetailsScreen extends React.Component {
       <View style={{flex:1}}>
         <SelectedFiltersFlatList
                 data = {this.state.andArrays}
-                onDelete = {this._onDeleteSearchItem}
-                toggleNegativity = {this._toggleNegativity}
-                onFilterDrag = {this._onFilterDrag}
+                onDelete = {this.onDeleteSearchItem}
+                toggleNegativity = {this.toggleNegativity}
+                onFilterDrag = {this.onFilterDrag}
         />
         <ScrollView style={styles.container}>
           <Card style={styles.card}>

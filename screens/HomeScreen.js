@@ -25,6 +25,9 @@ import InformationComponent from '../components/InformationComponent'
 /**
  * The 'main' file of the app that keeps track of the overall app state
  * and presents the main ui view.
+ * 
+ * NOTE on syntax: we used an underscore as a prefix for any custom methods which are only 
+ * used in the class where they're defined ('simulating' the 'private' keyword in plain js).
  * @author Ville Lohkovuori, Timi Liljeström
  */
 
@@ -161,7 +164,7 @@ export default class HomeScreen extends React.Component {
 
       API.onChoosingPropsGetUrls(queryArray, startDate, endDate).then( resultsArray => {
 
-        const extension = /\.(gif|jpg|jpeg|tiff|png)$/i // we need to filter out the one .docx that's returned for some reason
+        const extension = /\.(gif|jpg|jpeg|tiff|png)$/i // we need to filter out the one .docx file that's returned for some reason
         const filteredArray = resultsArray.filter(url => extension.test(url))
 
         self.setState({
@@ -171,44 +174,8 @@ export default class HomeScreen extends React.Component {
     }, 10) // setTimeout
   } // _fetchImagesBasedOnProps
 
-  // called when hitting 'enter' after typing in the search bar
-  _addTypedQuery = (typedString) => {
-
-    // it makes sense to make the query strings case-agnostic, as the user doesn't know the casing 
-    // when typing. right now, all the top categories are fetched by default, so the search is 
-    // pretty useless, but it works and would be useable with more varied data
-    typedString = typedString.toLowerCase() 
-
-    this.addOrTypeSearchItem(typedString, this)
-    this._fetchImagesBasedOnProps()
-  } // _addTypedQuery
-
-  // passed all the way down to individual SearchItem components
-  _toggleNegativity = (term, subArrayIndex) => {
-
-    // NOTE: there might be a less convoluted way to do this, but rn I can't think of it
-    let subArray = this.state.andArrays[subArrayIndex].slice()
-
-    subArray.map(queryData => {
-        if (queryData.term === term) {
-        queryData.isNegative = !queryData.isNegative
-        return queryData
-      }
-    })
-    
-    let tempAndArraysState = this.state.andArrays.slice() // copy the state... inefficient but whatever
-    tempAndArraysState[subArrayIndex] = subArray
-    this.setState({ andArrays: tempAndArraysState })
-    
-    this._fetchImagesBasedOnProps()
-  } // _toggleNegativity
-
-  _toggleInformation = () => {
-    this.setState(prevState=>({ showInformation: !prevState.showInformation}))
-  }
-
   // given to ScrollableFlatList as its onCategoryItemPress callback
-  _onFlatListItemPress = (item) => {
+  onFlatListItemPress = (item) => {
 
     this.addOrTypeSearchItem(item, this)
     this._fetchImagesBasedOnProps()
@@ -235,11 +202,92 @@ export default class HomeScreen extends React.Component {
     }
     
     this.setState({showSubCategory: true, iconArrow: 'chevron-up'})
-  } // _onFlatListItemPress
+  } // onFlatListItemPress
+
+  // passed all the way down to individual SearchItem components... non-ideal, 
+  // but to force a re-render with each altering of HomeScreen state, it must be done
+  onDeleteSearchItem = (term, indexOfSubArray, self) => {
+
+    if (self === null || self === undefined) {
+      self = this
+    }
+
+    const updatedSubArray = self.state.andArrays[indexOfSubArray].filter(queryItem => queryItem.term != term)
+
+    if (updatedSubArray.length > 0) {
+      
+      let tempAndArraysState = self.state.andArrays.slice()
+      tempAndArraysState[indexOfSubArray] = updatedSubArray
+      self.setState({ andArrays: tempAndArraysState })
+    } else {
+
+      let tempAndArraysState2 = self.state.andArrays.slice()
+      tempAndArraysState2.splice(indexOfSubArray, 1)  // remove the subArray
+
+      self.setState({ andArrays: tempAndArraysState2 })
+    }
+    this._fetchImagesBasedOnProps() // done in HomeScreen, so it keeps 'this' as its context
+  } // onDeleteSearchItem
+
+  // called when dropping a visual search item on another in the top pen (in either DetailsScreen or HomeScreen)
+  onFilterDrag = (from, to, andArray, self) => {
+
+    let calledInHomeScreen = false
+
+    if (self === null || self === undefined) {
+      self = this
+      calledInHomeScreen = true
+    }
+
+    if (from === to) return
+
+    // the ui can only comfortably fit a limited number of AND-type queries
+    if (andArray.length > MAX_AND_QUERIES) return
+
+    let tempAndArraysState = self.state.andArrays.slice()
+    tempAndArraysState[to] = andArray
+    tempAndArraysState.splice(from, 1)
+
+     // 'self' refers to DetailsScreen's state in this case; this check is done to avoid setting the state twice if we're in HomeScreen
+    if (!calledInHomeScreen) {
+      self.setState({ andArrays: tempAndArraysState })
+    }
+    this.setState({ andArrays: tempAndArraysState }) // 'this' always refers to HomeScreen's state
+
+    this._fetchImagesBasedOnProps() // always done in HomeScreen, so it keeps 'this'. hacky, but it works
+  } // onFilterDrag
+
+  // passed all the way down to individual SearchItem components
+  toggleNegativity = (term, subArrayIndex, self) => {
+
+    /* I tried to bind 'this' in other ways, but was unsuccessful...
+       since a lot of the HomeScreen methods are needed in DetailsScreen as well, 
+       we need to define the context somehow. yet this method is called also 
+       in SelectedFiltersFlatList, where we don't have the correct context, 
+       so I have to put in this check here in HomeScreen... Fragile and convoluted -.- */
+    if (self === null || self === undefined) {
+      self = this
+    }
+
+    // NOTE: there might be a less convoluted way to do this, but rn I can't think of it
+    let subArray = self.state.andArrays[subArrayIndex].slice()
+
+    subArray.map(queryData => {
+        if (queryData.term === term) {
+        queryData.isNegative = !queryData.isNegative
+        return queryData
+      }
+    })
+    
+    let tempAndArraysState = self.state.andArrays.slice() // copy the state... inefficient but whatever
+    tempAndArraysState[subArrayIndex] = subArray
+    self.setState({ andArrays: tempAndArraysState })
+    
+    this._fetchImagesBasedOnProps() // keeps 'this' since it happens in HomeScreen
+  } // toggleNegativity
 
   // helper method to reduce code duplication.
-  // used in _onFlatListItemPress, _addTypedQuery, and in DetailsScreen's _onTagPress.
-  // NOTE: we need the 'this' reference due to some hacky ui update stuffs in DetailsScreen
+  // used in onFlatListItemPress, __addTypedQuery, and in DetailsScreen's _onTagPress.
   addOrTypeSearchItem = (item, self) => {
 
     let oneItemSubArrayContainsItem = false
@@ -262,44 +310,25 @@ export default class HomeScreen extends React.Component {
     }))
   } // addOrTypeSearchItem
 
-  // passed all the way down to individual SearchItem components... non-ideal, 
-  // but to force a re-render with each altering of HomeScreen state, it must be done
-  _onDeleteSearchItem = (term, indexOfSubArray) => {
+  // called when hitting 'enter' after typing in the search bar
+  _addTypedQuery = (typedString) => {
 
-    const updatedSubArray = this.state.andArrays[indexOfSubArray].filter(queryItem => queryItem.term != term)
+    // it makes sense to make the query strings case-agnostic, as the user doesn't know the casing 
+    // when typing. right now, all the top categories are fetched by default, so the search is 
+    // pretty useless, but it works and would be useable with more varied data
+    typedString = typedString.toLowerCase() 
 
-    if (updatedSubArray.length > 0) {
-      
-      let tempAndArraysState = this.state.andArrays.slice()
-      tempAndArraysState[indexOfSubArray] = updatedSubArray
-      this.setState({ andArrays: tempAndArraysState })
-    } else {
-
-      let tempAndArraysState2 = this.state.andArrays.slice()
-      tempAndArraysState2.splice(indexOfSubArray, 1)  // remove the subArray
-
-      this.setState({ andArrays: tempAndArraysState2 })
-    }
+    this.addOrTypeSearchItem(typedString, this)
     this._fetchImagesBasedOnProps()
-  } // _onDeleteSearchItem
+  } // _addTypedQuery
+  
+  // toggles the help text on or off
+  toggleInformation = () => {
+    this.setState(prevState=>({ showInformation: !prevState.showInformation}))
+  }
 
-  // called when dropping a visual search item on another in the top pen
-  _onFilterDrag = (from, to, andArray) => {
-
-    if (from === to) return
-
-    // the ui can only comfortably fit a limited number of AND-type queries
-    if (andArray.length > MAX_AND_QUERIES) return
-
-    let tempAndArraysState = this.state.andArrays.slice()
-    tempAndArraysState[to] = andArray
-    tempAndArraysState.splice(from, 1)
-    this.setState({ andArrays: tempAndArraysState })
-
-    this._fetchImagesBasedOnProps()
-  } // _onFilterDrag
-
-  _multiSliderValuesChange = values => {
+  // used in the timeline slider
+  multiSliderValuesChange = values => {
     this.setState({
       multiSliderValue: values,
     })
@@ -309,7 +338,7 @@ export default class HomeScreen extends React.Component {
   _closeOrOpenSubCategoryFlatList() {
 
     if (this.state.subCategoryOptions.length>0) {
-      var arrowDirection = (this.state.showSubCategory ? "chevron-down" : "chevron-up")
+      let arrowDirection = (this.state.showSubCategory ? "chevron-down" : "chevron-up")
       this.setState(prevState => ({ 
         showSubCategory: !prevState.showSubCategory,
         iconArrow: arrowDirection
@@ -317,8 +346,9 @@ export default class HomeScreen extends React.Component {
     }
   } // _closeOrOpenSubCategoryFlatList
 
-  // this is called from details screen
-  _setHomeScreenState = (state) => {
+  // this is called from details screen, to keep the states of the two screens 'in sync' 
+  // (in retrospect, we really should have used a state management library)
+  setHomeScreenState = (state) => {
     this.setState(state)
     this._fetchImagesBasedOnProps()
   }
@@ -326,29 +356,25 @@ export default class HomeScreen extends React.Component {
   render() {
 
     const { navigate } = this.props.navigation
-    const config = {
-      velocityThreshold: 0.3,
-      directionalOffsetThreshold: 80
-    }
 
     return (
       <SafeAreaView style={ styles.container }>
         {(this.state.andArrays.length > 0) && 
           <SelectedFiltersFlatList
                 data = {this.state.andArrays}
-                onDelete = {this._onDeleteSearchItem}
-                toggleNegativity = {this._toggleNegativity}
-                onFilterDrag = {this._onFilterDrag}
+                onDelete = {this.onDeleteSearchItem}
+                toggleNegativity = {this.toggleNegativity}
+                onFilterDrag = {this.onFilterDrag}
           />
         }
         <ScrollableFlatList
-              onCategoryItemPress={this._onFlatListItemPress}
+              onCategoryItemPress={this.onFlatListItemPress}
               data = {this.state.topLevelProps}
         />
         {/*Show the new sub category FlatList when clicking item from Main category FlatList*/}
         {(this.state.showSubCategory) && 
           (<ScrollableFlatList
-                    onCategoryItemPress={this._onFlatListItemPress}
+                    onCategoryItemPress={this.onFlatListItemPress}
                     data = {this.state.subCategoryOptions}/>
           )
         }
@@ -386,7 +412,7 @@ export default class HomeScreen extends React.Component {
           </View>
         )}
         {(this.state.showSlider && this.state.andArrays.length > 0) && 
-          <TimeLineSlider selectedStartYear={this.state.multiSliderValue[0]} selectedEndYear={this.state.multiSliderValue[1]} multiSliderValuesChange={this._multiSliderValuesChange} />
+          <TimeLineSlider selectedStartYear={this.state.multiSliderValue[0]} selectedEndYear={this.state.multiSliderValue[1]} multiSliderValuesChange={this.multiSliderValuesChange} />
         }
         {(this.state.andArrays.length > 0 && this.state.chosenImages.length > 0) && (
           <FlatList 
@@ -406,7 +432,10 @@ export default class HomeScreen extends React.Component {
                     rawImageUrl: rowData,
                     state: this.state,
                     onTagPress: this.addOrTypeSearchItem,
-                    setHomescreenState: this._setHomeScreenState
+                    setHomescreenState: this.setHomeScreenState,
+                    onFilterDrag: this.onFilterDrag,
+                    onDeleteSearchItem: this.onDeleteSearchItem,
+                    toggleNegativity: this.toggleNegativity
                   })}>
                     <View style={styles.box2} >
                       {/* fullImageDisplayUrl passed also here, because it looks a lot better than smallImageDisplayUrl */}
@@ -424,10 +453,10 @@ export default class HomeScreen extends React.Component {
           <ScrollView style={{flex: 1}}>
             <Card style={{marginTop:0, marginLeft: 5, marginRight: 5, marginBottom: 5}}>
               <Card.Actions>
-                <Button onPress={this._toggleInformation}>{(this.state.showInformation)? 'Hide' : 'How to use?'}</Button>
+                <Button onPress={this.toggleInformation}>{(this.state.showInformation)? 'Hide' : 'How to use?'}</Button>
               </Card.Actions>
               {(this.state.showInformation) && (
-                <InformationComponent toggleInformation={this._toggleInformation} MAX_AND_QUERIES={MAX_AND_QUERIES} MAX_OR_QUERIES={MAX_OR_QUERIES}/>
+                <InformationComponent toggleInformation={this.toggleInformation} MAX_AND_QUERIES={MAX_AND_QUERIES} MAX_OR_QUERIES={MAX_OR_QUERIES}/>
               )}
             </Card>
           </ScrollView>

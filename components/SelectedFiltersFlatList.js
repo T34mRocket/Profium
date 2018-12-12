@@ -38,7 +38,7 @@ const SelectedFiltersFlatList = ({ data, onDelete, toggleNegativity, onFilterDra
         />
     </View>
   )
-}
+} // SelectedFiltersFlatList
 
 export default SelectedFiltersFlatList
   

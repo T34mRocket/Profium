@@ -24,17 +24,17 @@ const TimeLineSlider = ({ selectedStartYear, selectedEndYear, multiSliderValuesC
           </View>
         </View>
         <MultiSlider
-					values={[
-					selectedStartYear,
-					selectedEndYear,
-					]}
-					onValuesChange={multiSliderValuesChange}
-					sliderLength={windowWidth}
-					min={1960}
-					max={(new Date()).getFullYear()}
-					step={1}
-					//allowOverlap
-					snapped
+          values={[
+          selectedStartYear,
+          selectedEndYear,
+          ]}
+          onValuesChange={multiSliderValuesChange}
+          sliderLength={windowWidth}
+          min={1960}
+          max={(new Date()).getFullYear()}
+          step={1}
+          //allowOverlap
+          snapped
         />
       </View>
     </View>
