@@ -95,7 +95,7 @@ export default API = {
   // called when clicking on an image to enter the detail view
   getImageDetails: function(imageUrl) {
 
-    const timeStampPromise = this._getImageTimeStamp(imageUrl)[0] // should only contain one value
+    const timeStampPromise = this._getImageTimeStamp(imageUrl) // should only contain one value
 
     const tagsPromise = this._getImageTags(imageUrl)
 

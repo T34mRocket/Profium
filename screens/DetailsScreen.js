@@ -40,6 +40,7 @@ export default class DetailsScreen extends React.Component {
 
     API.getImageDetails(this.props.navigation.state.params.rawImageUrl).then(imageDetails => {  
 
+      console.log("timeStamp: " + imageDetails.timeStamp)
       this.setState({ timeStamp: imageDetails.timeStamp, tags: imageDetails.tags })
     })
   }
