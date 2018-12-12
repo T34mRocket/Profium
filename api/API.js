@@ -158,15 +158,19 @@ export default API = {
 
       const andArrayLength = andTypeInnerArray.length
 
+      let tagNumber = 0
+      
       andTypeInnerArray.forEach( (queryData, index) => {
 
         if (queryData.isNegative) {
+
+          const tagId = `?tag${++tagNumber}` // the tag will need to be unique for each query to ensure correct results
           
           // '!' == '%21' in the weird encoding that this stuff uses.
           // there are 3-4 tag properties on each image; the !bound() operation 
           // ensures that we don't return the image url if even one tag matches the given term
           queryString += `?depic ${MOD_DATE} ?date . ?depic ${DEPICTED_OBJ_INV} ?url . 
-          OPTIONAL { ?depic ${DOC_SPECIFIER} ?tag . FILTER (?tag = '${queryData.term}') } . FILTER ( %21bound(?tag) )`
+          OPTIONAL { ?depic ${DOC_SPECIFIER} ${tagId} . FILTER (${tagId} = '${queryData.term}') } . FILTER ( %21bound(${tagId}) )`
         } else {
 
           queryString += `?depic ${MOD_DATE} ?date . ?depic ${DOC_SPECIFIER} '${queryData.term}' 
