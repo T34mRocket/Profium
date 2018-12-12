@@ -289,7 +289,7 @@ export default class HomeScreen extends React.Component {
     if (from === to) return
 
     // the ui can only comfortably fit a limited number of AND-type queries
-    if (this.state.andArrays[to].length >= MAX_AND_QUERIES) return
+    if (andArray.length > MAX_AND_QUERIES) return
 
     let tempAndArraysState = this.state.andArrays.slice()
     tempAndArraysState[to] = andArray

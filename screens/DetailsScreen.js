@@ -5,6 +5,7 @@ import { Button, Card } from 'react-native-paper'
 import { HeaderBackButton } from 'react-navigation'
 import SelectedFiltersFlatList from '../components/SelectedFiltersFlatList'
 import API from '../api/API'
+import HomeScreen from './HomeScreen'
 
 /**
  * Component for the detail view that opens when you click on an image in
@@ -82,6 +83,9 @@ export default class DetailsScreen extends React.Component {
   _onFilterDrag = (from, to, andArray) => {
 
     if (from === to) return
+
+    // the ui can only comfortably fit a limited number of AND-type queries
+    if (andArray.length > HomeScreen.MAX_AND_QUERIES) return
 
     let tempAndArraysState = this.state.andArrays.slice()
     tempAndArraysState[to] = andArray
