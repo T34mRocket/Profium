@@ -83,7 +83,7 @@ export default class HomeScreen extends React.Component {
           round
           lightTheme
           autoCapitalize = 'none'
-          maxLength={30}
+          maxLength={20}
           clearIcon={{ color: 'black' }}
           containerStyle={{backgroundColor: '#517fa4', flex:1, alignSelf: 'center', borderTopColor:'#517fa4', borderBottomColor:'#517fa4'}}
           inputStyle={{backgroundColor: 'white'}}
@@ -405,7 +405,6 @@ export default class HomeScreen extends React.Component {
                 )
               }
             </View>
-            {/*Empty view so that the arrow icon is in center of screen*/}
             <View style={styles.resultsBox}>
               <Text style={{fontSize:18}}>Results: {this.state.chosenImages.length}</Text>
             </View>
