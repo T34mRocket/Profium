@@ -40,8 +40,6 @@ export default class DetailsScreen extends React.Component {
 
     API.getImageDetails(this.props.navigation.state.params.rawImageUrl).then(imgDetails => {  
 
-      console.log("creator: " + imgDetails.creator)
-      console.log("description: " + imgDetails.description)
       this.setState({ 
         timeStamp: imgDetails.timeStamp, 
         tags: imgDetails.tags, 
@@ -182,7 +180,8 @@ const styles = StyleSheet.create({
   },
   row: {
     flex: 1,
-    flexDirection: "row"
+    flexDirection: "row",
+    marginTop: 18
   },
   box1: {
     flex: 1
