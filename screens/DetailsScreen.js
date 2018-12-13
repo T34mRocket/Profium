@@ -29,7 +29,7 @@ export default class DetailsScreen extends React.Component {
   constructor(props) {
     super(props)
 
-    this.handleBackButtonClick = this.handleBackButtonClick.bind(this);
+    this.handleBackButtonClick = this.handleBackButtonClick.bind(this)
 
     this.state = this.props.navigation.state.params.state
 
