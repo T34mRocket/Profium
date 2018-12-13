@@ -23,6 +23,10 @@ const IMG_TYPE_NORMAL = '&type=normal'
 // gives the useful, tag-like properties, e.g. 'marketing' or 'management'
 const DOC_SPECIFIER = '<http://www.profium.com/tuomi/asiakirjatyypinTarkenne>'
 
+const DOC_DESC = '<http://www.profium.com/tuomi/asiakirjanKuvaus>'
+
+const DOC_CREATOR = '<http://www.profium.com/tuomi/asiakirjanVastuuhenkilo>'
+
 const GET_ALL_TOP_LVL_PROPS = `SELECT DISTINCT ?prop WHERE { ?img a ${IMAGE} . ?img ${DEPICTED_OBJ} ?depic . ?depic ${DOC_SPECIFIER} ?prop }`
 
 export default API = {
@@ -95,13 +99,16 @@ export default API = {
   // called when clicking on an image to enter the detail view
   getImageDetails: function(imageUrl) {
 
+    // it's easier to do this than to combine the queries and parse 
+    // the returned newly formatted xml object
     const timeStampPromise = this._getImageTimeStamp(imageUrl)
-
     const tagsPromise = this._getImageTags(imageUrl)
+    const creatorPromise = this._getImageCreator(imageUrl)
+    const descPromise = this._getImageDescription(imageUrl)
 
-    return Promise.all([timeStampPromise, tagsPromise]).then(resultsArray => {
+    return Promise.all([timeStampPromise, tagsPromise, creatorPromise, descPromise]).then(resultsArray => {
 
-      return { timeStamp: resultsArray[0], tags: resultsArray[1] }
+      return { timeStamp: resultsArray[0], tags: resultsArray[1], creator: resultsArray[2], description: resultsArray[3] }
     })
   }, // getImageDetails
 
@@ -121,6 +128,30 @@ export default API = {
 
     const query = `SELECT DISTINCT ?tag WHERE { ?depic ${DEPICTED_OBJ_INV} '${imageUrl}' . 
     ?depic ${DOC_SPECIFIER} ?tag }`
+
+    const config = {
+      query: query,
+      useUri: false
+    }
+    return this._query(config)
+  },
+
+  _getImageCreator: function(imageUrl) {
+
+    const query = `SELECT DISTINCT ?creator WHERE { ?depic ${DEPICTED_OBJ_INV} '${imageUrl}' . 
+    ?depic ${DOC_CREATOR} ?creator }`
+
+    const config = {
+      query: query,
+      useUri: false
+    }
+    return this._query(config)
+  },
+
+  _getImageDescription: function(imageUrl) {
+
+    const query = `SELECT DISTINCT ?desc WHERE { ?depic ${DEPICTED_OBJ_INV} '${imageUrl}' . 
+    ?depic ${DOC_DESC} ?desc }`
 
     const config = {
       query: query,

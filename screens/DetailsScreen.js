@@ -38,11 +38,18 @@ export default class DetailsScreen extends React.Component {
 
   _obtainImageDetails = () => {
 
-    API.getImageDetails(this.props.navigation.state.params.rawImageUrl).then(imageDetails => {  
+    API.getImageDetails(this.props.navigation.state.params.rawImageUrl).then(imgDetails => {  
 
-      this.setState({ timeStamp: imageDetails.timeStamp, tags: imageDetails.tags })
+      console.log("creator: " + imgDetails.creator)
+      console.log("description: " + imgDetails.description)
+      this.setState({ 
+        timeStamp: imgDetails.timeStamp, 
+        tags: imgDetails.tags, 
+        creator: imgDetails.creator, 
+        description: imgDetails.description 
+      })
     })
-  }
+  } // _obtainImageDetails
 
   toggleNegativity = (term, subArrayIndex) => {
 
@@ -112,7 +119,7 @@ export default class DetailsScreen extends React.Component {
     setTimeout(function() {
 
       self.props.navigation.state.params.setHomescreenState(self.state)
-    }, 50)
+    }, 10)
   }
 
   render() {
@@ -124,7 +131,7 @@ export default class DetailsScreen extends React.Component {
              </Card.Actions>
     })
 
-    const descriptions = this.state.tags.map(tag => {
+    const tagDescriptions = this.state.tags.map(tag => {
       
       return <CardContent text='Tag: ' key={tag} />
     })
@@ -143,17 +150,15 @@ export default class DetailsScreen extends React.Component {
             <Card.Content>
               <View style={styles.row}>
               <View style={styles.box1}>
-                <CardTitle
-                  subtitle="Property"
-                />
                 <CardContent text={`Taken:`} />
-                {descriptions}
+                <CardContent text={'By:'} />
+                <CardContent text={'Desc.:'} />
+                {tagDescriptions}
               </View>
               <View style={styles.box2} >
-                <CardTitle
-                  subtitle={`Value`}
-                />
                 <CardContent text={this.state.timeStamp} />
+                <CardContent text={this.state.creator} />
+                <CardContent text={this.state.description} />
                 {tags}
               </View>
             </View>
